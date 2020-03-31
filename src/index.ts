@@ -88,7 +88,7 @@ const server = micri(async (req: IncomingMessage, res: ServerResponse) => {
 			(o: File) =>
 				o.name &&
 				o.file && // It's a file
-				o.name.startsWith('index.')
+				o.name.toLowerCase().startsWith('index.')
 		);
 		if (index) {
 			return sendFile(res, index);
