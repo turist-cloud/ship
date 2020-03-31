@@ -54,7 +54,7 @@ $ ./run.sh
 
 Upload the files:
 
-![Ship](/ship.png)
+![Ship](/ship.gif)
 
 
 And you are ready 🎉
