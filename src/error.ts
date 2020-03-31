@@ -6,7 +6,7 @@ export interface TuristError {
 	code: string;
 	message: string;
 	[x: string]: any;
-};
+}
 
 /**
  * Send a standardized error to the HTTP client.
@@ -33,20 +33,24 @@ export function sendError(req: IncomingMessage, res: ServerResponse, statusCode:
 	}
 
 	if (types.includes('text/html')) {
-		return send(res, statusCode, `
+		return send(
+			res,
+			statusCode,
+			`
 <html>
 <h2>${STATUS_CODES[statusCode] || 'Internal Server Error'}</h2>
 <p>${error.message}</p>
-`);
+`
+		);
 	} else if (types.includes('*/*')) {
 		return send(res, statusCode, {
-			error
+			error,
 		});
 	} else if (types.includes('text/plain')) {
-		return send(res, statusCode, error.message)
+		return send(res, statusCode, error.message);
 	} else {
 		return send(res, statusCode, {
-			error
+			error,
 		});
 	}
 }

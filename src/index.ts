@@ -28,7 +28,11 @@ function removeTrailing(str: string, ch: string): string {
 function buildUrl(host: string, path: string): string {
 	host = host.split(':')[0];
 
-	if (!/^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/.test(host)) {
+	if (
+		!/^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/.test(
+			host
+		)
+	) {
 		throw TypeError('Invalid host');
 	}
 
@@ -38,7 +42,7 @@ function buildUrl(host: string, path: string): string {
 
 	path = pathNormalize(path);
 	path = removeTrailing(path, '/');
-	path = `/${host}${path}`
+	path = `/${host}${path}`;
 
 	return `${ROOT}${path}:`;
 }
@@ -63,7 +67,7 @@ const server = micri(async (req: IncomingMessage, res: ServerResponse) => {
 	if (!host) {
 		return sendError(req, res, 400, {
 			code: 'invalid_host',
-			message: 'Invalid Host'
+			message: 'Invalid Host',
 		});
 	}
 
@@ -75,7 +79,7 @@ const server = micri(async (req: IncomingMessage, res: ServerResponse) => {
 	if (!meta) {
 		return sendError(req, res, 404, {
 			code: 'not_found',
-			message: 'Page not found'
+			message: 'Page not found',
 		});
 	} else if (meta.folder) {
 		const { value: dir } = await apiFetch(`${graphUrl}/children`);
@@ -92,7 +96,7 @@ const server = micri(async (req: IncomingMessage, res: ServerResponse) => {
 			// TODO File listing
 			return sendError(req, res, 404, {
 				code: 'not_found',
-				message: 'Page not found'
+				message: 'Page not found',
 			});
 		}
 	}
