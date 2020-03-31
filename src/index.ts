@@ -51,7 +51,7 @@ async function sendFile(res: ServerResponse, file: File) {
 	const data = await fetch(file['@microsoft.graph.downloadUrl']);
 
 	res.setHeader('Content-Type', file.file.mimeType || 'application/octet-stream');
-	res.setHeader('Content-Disposition', `content-disposition: inline; filename="${file.name}"`);
+	res.setHeader('Content-Disposition', `inline; filename="${file.name}"`);
 	res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
 	res.setHeader('ETag', file.eTag);
 
