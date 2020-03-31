@@ -100,7 +100,7 @@ const server = micri(async (req: IncomingMessage, res: ServerResponse) => {
 	return send(res, 200);
 });
 
-server.listen(3000);
+server.listen(process.env.PORT || 3000);
 
 apiFetch(`${ROOT}:`)
 	.then(() => console.log(`Authenticated`))
