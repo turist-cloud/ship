@@ -12,7 +12,7 @@ Ship websites like it's the 90's again! FTP FTW
 Ship It
 -------
 
-Create a new app in Azure AD:
+**Create a new app in Azure AD**
 
 - Platform configuration: Background process and Automation
 - Create a client secret and copy its value into a safe place
@@ -22,13 +22,32 @@ Create a new app in Azure AD:
 
 ![AAD Permissions](/aad-perms.png)
 
+**Create a directory in OneDrive or SharePoint Online**
+
+Create a new directory for serving files in
+[OneDrive](https://docs.microsoft.com/en-us/graph/api/resources/onedrive?view=graph-rest-beta)
+or a SharePoint Online
+[site](https://docs.microsoft.com/en-us/graph/api/resources/sharepoint?view=graph-rest-beta#sharepoint-api-root-resources).
+The directory can be located anywhere as long as you can figure out how
+to point it in Microsoft Graph API.
+
+By default Ship will look for directories named by domains under this
+directory and serve the files from there. Anything looking like `index.*` will be
+served like an index.
+
+**Ship the code**
+
 Install the server:
 
 ```
 $ yarn install
 ```
 
-Create a run script or set envs what ever way you prefer:
+Create a run script or set environment variables in whichever way you prefer.
+In this repository we used Azure Apps Service for fast and easy deploy, but
+there is nothing stopping you from running this on your Raspberry Pi.
+
+Here is an example what a startup script could look like.
 
 *run.sh*:
 
@@ -44,7 +63,12 @@ ROOT='/sites/root/drive/root:/ship-demo' \
 
 `ROOT` is a path to a OneDrive folder or a SharePoint Online site drive folder.
 The example uses the default Document Library and a folder called `ship-demo`
-under it.
+under it. All your websites will be server from here based on `Host`. So for
+example if you are running locally then `http://localhost:3000` is served from
+`/ship-demo/localhost`.
+
+`TENANT_ID` and `CLIENT_ID` is given on the AAD App registration Overview tab.
+`CLIENT_SECRET` was created and shown once on the Certificates & secrets tab.
 
 Start it (probably not manually?):
 
@@ -52,7 +76,7 @@ Start it (probably not manually?):
 $ ./run.sh
 ```
 
-Upload the files:
+Upload the files for your first website:
 
 ![Ship](/ship.gif)
 
