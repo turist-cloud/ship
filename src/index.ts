@@ -105,7 +105,7 @@ const server = micri(async (req: IncomingMessage, res: ServerResponse) => {
 
 	return sendError(req, res, 404, {
 		code: 'not_found',
-		message: 'Page not found'
+		message: 'Page not found',
 	});
 });
 
