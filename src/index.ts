@@ -4,7 +4,6 @@ import LRU from 'lru-cache';
 import accesslog from 'access-log';
 import micri from 'micri';
 import { IncomingMessage, ServerResponse, send } from 'micri';
-import ms from 'ms';
 import _apiFetch from './fetch-graph-api';
 import fetch from './fetch';
 import getEnv from './get-env';
@@ -12,14 +11,16 @@ import promiseCache from './promise-cache';
 import { File } from './graph-api-types';
 import { sendError } from './error';
 
+const CACHE_SEC = 30;
+const CACHE_CONTROL = `public, max-age=${CACHE_SEC}, must-revalidate, s-maxage=${CACHE_SEC}, stale-while-revalidate`;
 const [ROOT] = getEnv('ROOT');
 
-const cache = new LRU({
+const metaCache = new LRU({
 	max: 100,
-	maxAge: ms('30s'),
+	maxAge: CACHE_SEC * 1000,
 });
 
-const apiFetch = promiseCache(cache, _apiFetch);
+const apiFetch = promiseCache(metaCache, _apiFetch);
 
 function removeTrailing(str: string, ch: string): string {
 	return !str.endsWith(ch) ? str : removeTrailing(str.slice(0, -1), ch);
@@ -55,6 +56,7 @@ async function sendFile(req: IncomingMessage, res: ServerResponse, file: File) {
 	}
 
 	const data = await fetch(file['@microsoft.graph.downloadUrl'], {
+		method: req.method,
 		compress: false,
 		// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 		// @ts-ignore
@@ -76,14 +78,40 @@ async function sendFile(req: IncomingMessage, res: ServerResponse, file: File) {
 		res.setHeader('Content-Length', len);
 	}
 	res.setHeader('Content-Disposition', `inline; filename="${file.name}"`);
-	res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+	res.setHeader('Cache-Control', CACHE_CONTROL);
 	res.setHeader('ETag', file.eTag);
 
 	send(res, data.status, data.body);
 }
 
+const ALLOW_METHODS = ['GET', 'HEAD', 'OPTIONS'];
+const ALLOW_METHODS_STR = ALLOW_METHODS.join(', ');
+
 const server = micri(async (req: IncomingMessage, res: ServerResponse) => {
 	accesslog(req, res);
+
+	res.setHeader('Vary', 'Accept, Accept-Encoding, Range');
+
+	if (!ALLOW_METHODS.includes(req.method || '')) {
+		res.setHeader('Allow', ALLOW_METHODS_STR);
+		return sendError(req, res, 405, {
+			code: 'method_not_allowed',
+			message: 'Method not allowed',
+		});
+	}
+
+	if (req.method === 'OPTIONS') {
+		res.writeHead(204, {
+			'Access-Control-Allow-Origin': '*',
+			'Access-Control-Allow-Methods': ALLOW_METHODS_STR,
+			'Access-Control-Allow-Headers': 'Accept, Range',
+			'Access-Control-Expose-Headers':
+				'Accept-Ranges, Content-Length, Content-Type, Content-Encoding, Content-Disposition, Date, ETag, Transfer-Encoding, Server',
+			'Access-Control-Max-Age': '86400',
+		});
+		res.end();
+		return;
+	}
 
 	const url = parse(req.url || '/', true);
 	const host = req.headers.host;
