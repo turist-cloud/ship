@@ -56,8 +56,9 @@ async function sendFile(req: IncomingMessage, res: ServerResponse, file: File) {
 
 	const data = await fetch(file['@microsoft.graph.downloadUrl'], {
 		compress: false,
+		// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 		// @ts-ignore
-		headers
+		headers,
 	});
 	const transferEncoding = data.headers.get('transfer-encoding');
 	const contentType = data.headers.get('content-type');
