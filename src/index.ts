@@ -4,7 +4,7 @@ import LRU from 'lru-cache';
 import accesslog from 'access-log';
 import micri from 'micri';
 import ms from 'ms';
-import { IncomingMessage, ServerResponse, send } from 'micri';
+import { IncomingMessage, ServerResponse } from 'micri';
 import _apiFetch from './fetch-graph-api';
 import fetch from './fetch';
 import getEnv from './get-env';
@@ -99,9 +99,14 @@ const server = micri(async (req: IncomingMessage, res: ServerResponse) => {
 				message: 'Page not found',
 			});
 		}
+	} else if (meta.file) {
+		return sendFile(res, meta);
 	}
 
-	return send(res, 200);
+	return sendError(req, res, 404, {
+		code: 'not_found',
+		message: 'Page not found'
+	});
 });
 
 server.listen(process.env.PORT || 3000);
