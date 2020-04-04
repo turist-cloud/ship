@@ -81,7 +81,7 @@ Upload the files for your first website:
 ![Ship](/ship.gif)
 
 
-And you are ready 🎉
+And you are ready to ship 🎉
 
 ```
 $ ./run.sh
@@ -96,3 +96,55 @@ Authenticated
 ::ffff:127.0.0.1 - - [31/Mar/2020:20:54:03 +0200] "GET /_next/static/JHDZ9NRlatJ_ayvFY4ARj/pages/_app.js HTTP/1.1" 200 - "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36"
 ::ffff:127.0.0.1 - - [31/Mar/2020:20:54:03 +0200] "GET /_next/static/chunks/framework.c8966c7d8b377309e6b8.js HTTP/1.1" 200 - "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36"
 ```
+
+Using Azure App Services and CloudFlare
+---------------------------------------
+
+1. Create an App Service and configure deploys with e.g. GitHub
+   (You can just use the Wizard and look how the GitHub action is implemented
+    in this repository)
+2. Point your domain's `NS` records to CloudFlare
+3. Set the following DNS records in CloudFlare:
+  - `A` `@` -> `<Your App's IP as shown in Azure e.g. in Custom domains>`
+  - `CNAME` -> `@`
+4. Go to *Custom domains* tab in your Azure App Service
+  1. Click *Add custom domain* and type in the apex domain
+  2. At this point the verification may fail and Azure might ask you to add
+     a `TXT` record and tell you that the `A` record is incorrect
+5. Go back to Cloudflare
+  1. Click the cloud symbol on the `A` record to make it point
+     directly to Azure (you may revert this later)
+  2. Add the `TXT` record as instructed in Azure
+6. Retry adding the domain in Azure
+   (and then revert back the CloudFlare proxy setting)
+7. Create an origin cert in CloudFlare
+  1. Goto the *SSL/TLS* tab
+  2. Select *Full (strict)* encryption mode
+  1. Goto the *Origin* sub-tab
+  2. Click *Create Certificate*, use the defaults, and just copy & paste the
+     two files
+  3. As Azure needs the certificate in a different format, run the following
+     in a terminal (the password can be anything and you'll only need it once):
+	 `openssl pkcs12 -export -out domain.pfx -inkey domain.key -in domain.crt`
+8. In Azure, go to *TLS/SSL settings* -> *Private Key Certificates*
+  1. Click *Upload Certificate*, select the file, and provide the previously set
+     password
+  2. Go to *Custom domains* and add the *SSL Binding*
+  3. At this point you may want to turn	on the *HTTPS Only* knob
+
+Rinse and repeat. You can add as many domains as you want and the domains will
+be served from the respective folders in your OneDrive or SPO Document Library.
+
+To make `wwww` work you may either add it as a separate domain in Azure App
+Services or you can make a forwarding rule in CloudFlare. The first way
+allows you to serve different files for the subdomain, while the latter
+just redirects to the apex domain. Here is how you can add the forwarding
+in CloudFlare.
+
+1. Go to *Page Rules*
+2. Click *Add Page Rule*
+3. Type this to the first input box: `www.mycooldomain.com/*`
+4. Select *Forwarding URL* from the dropdown menu
+5. Select `301` from the next menu
+6. Type this to the last input box: `https://mycooldomain.com/$1`
+7. Deploy and save
