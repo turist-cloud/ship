@@ -105,32 +105,32 @@ Using Azure App Services and CloudFlare
     in this repository)
 2. Point your domain's `NS` records to CloudFlare
 3. Set the following DNS records in CloudFlare:
-  - `A` `@` -> `<Your App's IP as shown in Azure e.g. in Custom domains>`
-  - `CNAME` -> `@`
+    - `A` `@` -> `<Your App's IP as shown in Azure e.g. in Custom domains>`
+    - `CNAME` -> `@`
 4. Go to *Custom domains* tab in your Azure App Service
-  1. Click *Add custom domain* and type in the apex domain
-  2. At this point the verification may fail and Azure might ask you to add
-     a `TXT` record and tell you that the `A` record is incorrect
+    1. Click *Add custom domain* and type in the apex domain
+    2. At this point the verification may fail and Azure might ask you to add
+       a `TXT` record and tell you that the `A` record is incorrect
 5. Go back to Cloudflare
-  1. Click the cloud symbol on the `A` record to make it point
-     directly to Azure (you may revert this later)
-  2. Add the `TXT` record as instructed in Azure
+    1. Click the cloud symbol on the `A` record to make it point
+       directly to Azure (you may revert this later)
+    2. Add the `TXT` record as instructed in Azure
 6. Retry adding the domain in Azure
-   (and then revert back the CloudFlare proxy setting)
+ (and then revert back the CloudFlare proxy setting)
 7. Create an origin cert in CloudFlare
-  1. Goto the *SSL/TLS* tab
-  2. Select *Full (strict)* encryption mode
-  1. Goto the *Origin* sub-tab
-  2. Click *Create Certificate*, use the defaults, and just copy & paste the
-     two files
-  3. As Azure needs the certificate in a different format, run the following
-     in a terminal (the password can be anything and you'll only need it once):
-	 `openssl pkcs12 -export -out domain.pfx -inkey domain.key -in domain.crt`
+    1. Goto the *SSL/TLS* tab
+    2. Select *Full (strict)* encryption mode
+    1. Goto the *Origin* sub-tab
+    2. Click *Create Certificate*, use the defaults, and just copy & paste the
+       two files
+    3. As Azure needs the certificate in a different format, run the following
+       in a terminal (the password can be anything and you'll only need it once):
+	   `openssl pkcs12 -export -out domain.pfx -inkey domain.key -in domain.crt`
 8. In Azure, go to *TLS/SSL settings* -> *Private Key Certificates*
-  1. Click *Upload Certificate*, select the file, and provide the previously set
-     password
-  2. Go to *Custom domains* and add the *SSL Binding*
-  3. At this point you may want to turn	on the *HTTPS Only* knob
+    1. Click *Upload Certificate*, select the file, and provide the previously set
+       password
+    2. Go to *Custom domains* and add the *SSL Binding*
+    3. At this point you may want to turn	on the *HTTPS Only* knob
 
 Rinse and repeat. You can add as many domains as you want and the domains will
 be served from the respective folders in your OneDrive or SPO Document Library.
