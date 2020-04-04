@@ -3,16 +3,16 @@ import { parse } from 'url';
 import LRU from 'lru-cache';
 import accesslog from 'access-log';
 import micri from 'micri';
-import { IncomingMessage, ServerResponse, send } from 'micri';
+import { IncomingMessage, ServerResponse } from 'micri';
 import _apiFetch from './fetch-graph-api';
-import fetch from './fetch';
 import getEnv from './get-env';
 import promiseCache from './promise-cache';
-import { File } from './graph-api-types';
+import sendFile from './send-file';
+import sendFileList from './send-file-list';
+import { File, Folder } from './graph-api-types';
 import { sendError } from './error';
+import { CACHE_SEC, DISABLE_FILE_LISTING, HIDDEN_FILES, PROTECTED_FILES } from './config';
 
-const CACHE_SEC = 30;
-const CACHE_CONTROL = `public, max-age=${CACHE_SEC}, must-revalidate, s-maxage=${CACHE_SEC}, stale-while-revalidate`;
 const [ROOT] = getEnv('ROOT');
 
 const metaCache = new LRU({
@@ -46,65 +46,6 @@ function buildUrl(host: string, path: string): string {
 	path = `/${host}${path}`;
 
 	return `${ROOT}${path}:`;
-}
-
-function makeReqHeaders(req: IncomingMessage) {
-	const headers: { [key: string]: string | string[] } = {};
-
-	const acceptEncoding = req.headers['accept-encoding'];
-	const range = req.headers['range'];
-
-	if (acceptEncoding) {
-		headers['accept-encoding'] = acceptEncoding;
-	}
-	if (range) {
-		headers['range'] = range;
-	}
-
-	return headers;
-}
-
-async function sendFile(req: IncomingMessage, res: ServerResponse, file: File) {
-	const data = await fetch(file['@microsoft.graph.downloadUrl'], {
-		method: req.method,
-		compress: false,
-		// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-		// @ts-ignore
-		headers: makeReqHeaders(req),
-	});
-
-	const acceptRanges = data.headers.get('accept-ranges');
-	const transferEncoding = data.headers.get('transfer-encoding');
-	const contentType = data.headers.get('content-type');
-	const contentRange = data.headers.get('content-range');
-	const contentEncoding = data.headers.get('content-encoding');
-	const len = data.headers.get('content-length');
-	const date = data.headers.get('date');
-
-	if (transferEncoding) {
-		res.setHeader('transfer-encoding', transferEncoding);
-	}
-	res.setHeader('Content-Type', contentType || 'application/octet-stream');
-	if (contentEncoding) {
-		res.setHeader('Content-Encoding', contentEncoding);
-	}
-	if (contentRange) {
-		res.setHeader('Content-Range', contentRange);
-	}
-	if (acceptRanges) {
-		res.setHeader('Accept-Ranges', acceptRanges);
-	}
-	if (len) {
-		res.setHeader('Content-Length', len);
-	}
-	res.setHeader('Content-Disposition', `inline; filename="${file.name}"`);
-	res.setHeader('Cache-Control', CACHE_CONTROL);
-	res.setHeader('ETag', file.eTag);
-	if (date) {
-		res.setHeader('Date', date);
-	}
-
-	send(res, data.status, data.body);
 }
 
 const ALLOW_METHODS = ['GET', 'HEAD', 'OPTIONS'];
@@ -157,20 +98,33 @@ const server = micri(async (req: IncomingMessage, res: ServerResponse) => {
 	} else if (meta.folder) {
 		const { value: dir } = await apiFetch(`${graphUrl}/children`);
 
+		const isIndexFile = (name: string) => {
+			const s = name.toLowerCase();
+
+			return s.startsWith('index.') && PROTECTED_FILES.every((re) => !re.test(s));
+		};
 		const index = dir.find(
 			(o: File) =>
 				o.name &&
 				o.file && // It's a file
-				o.name.toLowerCase().startsWith('index.')
+				isIndexFile(o.name)
 		);
 		if (index) {
 			return sendFile(req, res, index);
 		} else {
-			// TODO File listing
-			return sendError(req, res, 404, {
-				code: 'not_found',
-				message: 'Page not found',
-			});
+			if (DISABLE_FILE_LISTING) {
+				return sendError(req, res, 404, {
+					code: 'not_found',
+					message: 'Page not found',
+				});
+			} else {
+				return sendFileList(
+					req,
+					res,
+					url.pathname || '',
+					dir.filter((e: File | Folder) => HIDDEN_FILES.every((re) => !re.test(e.name.toLowerCase())))
+				);
+			}
 		}
 	} else if (meta.file) {
 		return sendFile(req, res, meta);
@@ -185,8 +139,8 @@ const server = micri(async (req: IncomingMessage, res: ServerResponse) => {
 server.listen(process.env.PORT || 3000);
 
 apiFetch(`${ROOT}:`)
-	.then(() => console.log(`Authenticated`))
+	.then(() => console.log(`Authenticated`)) // eslint-disable-line no-console
 	.catch((err: Error) => {
-		console.error(err);
+		console.error(err); // eslint-disable-line no-console
 		process.exit(1);
 	});

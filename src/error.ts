@@ -29,6 +29,7 @@ export function sendError(req: IncomingMessage, res: ServerResponse, statusCode:
 		const parsed = parseAll(req.headers);
 		types = parsed.mediaTypes;
 	} catch (err) {
+		// eslint-disable-next-line
 		console.error(err);
 	}
 
