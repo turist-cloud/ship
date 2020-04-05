@@ -73,3 +73,8 @@ export type File = {
 		lastModifiedDateTime: string;
 	};
 };
+
+export type DirectoryListing = {
+	'@odata.context': string;
+	value: Array<File | Folder>;
+};

@@ -1,7 +1,7 @@
-interface AnyCache {
-	get: (key: any) => any;
-	set: (key: any, value: Promise<any>) => any;
-	del: (key: any) => any;
+interface AnyCache<T = any> {
+	get: (key: string) => T | undefined;
+	set: (key: string, value: T) => any;
+	del: (key: string) => any;
 }
 
 /**
@@ -9,7 +9,7 @@ interface AnyCache {
  * @param {AnyCache} cache - A cache object implementing get(), set(), and del().
  * @param {any} fn - Any any async function.
  */
-export default function promiseCache(cache: AnyCache, fn: any) {
+export default function promiseCache<T = any>(cache: AnyCache<Promise<T>>, fn: (...args: any) => Promise<T>) {
 	return (...args: any[]) => {
 		const key = JSON.stringify(args);
 		let p = cache.get(key);

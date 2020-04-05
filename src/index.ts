@@ -1,53 +1,14 @@
-import { normalize as pathNormalize } from 'path';
 import { parse } from 'url';
-import LRU from 'lru-cache';
 import accesslog from 'access-log';
 import micri from 'micri';
 import { IncomingMessage, ServerResponse } from 'micri';
-import _apiFetch from './fetch-graph-api';
+import apiFetch from './fetch-graph-api';
 import getEnv from './get-env';
-import promiseCache from './promise-cache';
-import sendFile from './send-file';
-import sendFileList from './send-file-list';
-import { File, Folder } from './graph-api-types';
+import getSiteConfig from './get-site-config';
+import serveUri from './serve-uri';
 import { sendError } from './error';
-import { CACHE_SEC, DISABLE_FILE_LISTING, HIDDEN_FILES, PROTECTED_FILES } from './config';
 
 const [ROOT] = getEnv('ROOT');
-
-const metaCache = new LRU({
-	max: 100,
-	maxAge: CACHE_SEC * 1000,
-});
-
-const apiFetch = promiseCache(metaCache, _apiFetch);
-
-function removeTrailing(str: string, ch: string): string {
-	return !str.endsWith(ch) ? str : removeTrailing(str.slice(0, -1), ch);
-}
-
-function buildUrl(host: string, path: string): string {
-	host = host.split(':')[0];
-
-	if (
-		!/^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/.test(
-			host
-		)
-	) {
-		throw TypeError('Invalid host');
-	}
-
-	if (path.includes(':')) {
-		throw TypeError('Invalid path');
-	}
-
-	path = pathNormalize(path);
-	path = removeTrailing(path, '/');
-	path = `/${host}${path}`;
-
-	return `${ROOT}${path}:`;
-}
-
 const ALLOW_METHODS = ['GET', 'HEAD', 'OPTIONS'];
 const ALLOW_METHODS_STR = ALLOW_METHODS.join(', ');
 
@@ -78,62 +39,22 @@ const server = micri(async (req: IncomingMessage, res: ServerResponse) => {
 	}
 
 	const url = parse(req.url || '/', true);
-	const host = req.headers.host;
+	const host = req.headers.host?.split(':')[0] || '';
 
-	if (!host) {
+	if (
+		host === '' ||
+		!/^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/.test(
+			host
+		)
+	) {
 		return sendError(req, res, 400, {
 			code: 'invalid_host',
 			message: 'Invalid Host',
 		});
 	}
 
-	const graphUrl = buildUrl(host, url.pathname || '');
-	const meta = await apiFetch(graphUrl);
-
-	if (!meta) {
-		return sendError(req, res, 404, {
-			code: 'not_found',
-			message: 'Page not found',
-		});
-	} else if (meta.folder) {
-		const { value: dir } = await apiFetch(`${graphUrl}/children`);
-
-		const isIndexFile = (name: string) => {
-			const s = name.toLowerCase();
-
-			return s.startsWith('index.') && PROTECTED_FILES.every((re) => !re.test(s));
-		};
-		const index = dir.find(
-			(o: File) =>
-				o.name &&
-				o.file && // It's a file
-				isIndexFile(o.name)
-		);
-		if (index) {
-			return sendFile(req, res, index);
-		} else {
-			if (DISABLE_FILE_LISTING) {
-				return sendError(req, res, 404, {
-					code: 'not_found',
-					message: 'Page not found',
-				});
-			} else {
-				return sendFileList(
-					req,
-					res,
-					url.pathname || '',
-					dir.filter((e: File | Folder) => HIDDEN_FILES.every((re) => !re.test(e.name.toLowerCase())))
-				);
-			}
-		}
-	} else if (meta.file) {
-		return sendFile(req, res, meta);
-	}
-
-	return sendError(req, res, 404, {
-		code: 'not_found',
-		message: 'Page not found',
-	});
+	const siteConfig = await getSiteConfig(host);
+	return serveUri(req, res, host, url.pathname || '', siteConfig);
 });
 
 server.listen(process.env.PORT || 3000);

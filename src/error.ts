@@ -1,6 +1,8 @@
 import { STATUS_CODES } from 'http';
 import { send, IncomingMessage, ServerResponse } from 'micri';
 import { parseAll } from '@hapi/accept';
+import serveUri from './serve-uri';
+import { SiteConfig } from './get-site-config';
 
 export interface TuristError {
 	code: string;
@@ -14,7 +16,13 @@ export interface TuristError {
  * @param res is the outgoing response.
  * @param error is an object describing the error condition.
  */
-export function sendError(req: IncomingMessage, res: ServerResponse, statusCode: number, error: TuristError) {
+export async function sendError(
+	req: IncomingMessage,
+	res: ServerResponse,
+	statusCode: number,
+	error: TuristError,
+	siteConfig?: SiteConfig | null
+): Promise<void> {
 	let types = ['*/*'];
 
 	if (!error.code) {
@@ -34,6 +42,13 @@ export function sendError(req: IncomingMessage, res: ServerResponse, statusCode:
 	}
 
 	if (types.includes('text/html')) {
+		const customErrors = siteConfig?.customErrors;
+		const customPage = customErrors && customErrors[statusCode];
+		if (customPage) {
+			const host = req.headers.host?.split(':')[0] || '';
+			return serveUri(req, res, host, customPage, { dirListing: false });
+		}
+
 		return send(
 			res,
 			statusCode,
