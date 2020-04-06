@@ -9,34 +9,9 @@ import serveUri from './serve-uri';
 import { sendError } from './error';
 
 const [ROOT] = getEnv('ROOT');
-const ALLOW_METHODS = ['GET', 'HEAD', 'OPTIONS'];
-const ALLOW_METHODS_STR = ALLOW_METHODS.join(', ');
 
 const server = micri(async (req: IncomingMessage, res: ServerResponse) => {
 	accesslog(req, res);
-
-	res.setHeader('Vary', 'Accept, Accept-Encoding, Range');
-
-	if (!ALLOW_METHODS.includes(req.method || '')) {
-		res.setHeader('Allow', ALLOW_METHODS_STR);
-		return sendError(req, res, 405, {
-			code: 'method_not_allowed',
-			message: 'Method not allowed',
-		});
-	}
-
-	if (req.method === 'OPTIONS') {
-		res.writeHead(204, {
-			'Access-Control-Allow-Origin': '*',
-			'Access-Control-Allow-Methods': ALLOW_METHODS_STR,
-			'Access-Control-Allow-Headers': 'Accept, Accept-Encoding, Range',
-			'Access-Control-Expose-Headers':
-				'Accept-Ranges, Content-Range, Content-Length, Content-Type, Content-Encoding, Content-Disposition, Date, ETag, Transfer-Encoding, Server',
-			'Access-Control-Max-Age': '86400',
-		});
-		res.end();
-		return;
-	}
 
 	const url = parse(req.url || '/', true);
 	const host = req.headers.host?.split(':')[0] || '';
