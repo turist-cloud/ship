@@ -55,4 +55,4 @@ This will create a file `dist/index.js` which can be then copied and rename as
 like any URL. If the function file is called `index.fjs` then it will act like
 it was an index of the folder.
 
-See [examples](/examples) for more usage examples.
+See [examples](examples) for more usage examples.
