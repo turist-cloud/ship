@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 import { IncomingMessage, ServerResponse, send } from 'micri';
 import fetch from './fetch';
 import { CACHE_CONTROL } from './config';
@@ -54,7 +55,7 @@ export default async function sendFile(req: IncomingMessage, res: ServerResponse
 	}
 	res.setHeader('Content-Disposition', `inline; filename="${file.name}"`);
 	res.setHeader('Cache-Control', CACHE_CONTROL);
-	res.setHeader('ETag', file.eTag);
+	res.setHeader('ETag', `W/"${createHash('sha3-224').update(file.cTag).digest('hex')}"`);
 	if (date) {
 		res.setHeader('Date', date);
 	}
