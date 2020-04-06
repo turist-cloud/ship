@@ -25,6 +25,7 @@ const handlerCache = new LRU<string, Promise<MicriHandler>>({
 		} catch (err) {
 			err.message = `Failed to unlink "${tempPath}": ${err.message}`;
 
+			// eslint-disable-next-line no-console
 			console.error(err);
 		}
 	},
@@ -62,6 +63,7 @@ function makeEnv(): { [index: string]: string | undefined } {
 
 export default async function execFile(req: IncomingMessage, res: ServerResponse, file: File) {
 	const getHandler = promiseCache<MicriHandler>(handlerCache, async (ctag: string) => {
+		// eslint-disable-next-line no-console
 		console.log(`Fetching function: ${ctag}`);
 
 		const tempPath = getTempFilePath(ctag);
