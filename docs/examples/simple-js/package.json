@@ -1,0 +1,11 @@
+{
+  "name": "simple",
+  "private": true,
+  "description": "A simple Functions example",
+  "scripts": {
+    "build": "ncc build ./src/index.js"
+  },
+  "dependencies": {
+    "@zeit/ncc": "0.22.1"
+  }
+}
