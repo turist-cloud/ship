@@ -1,6 +1,8 @@
 import { createHash } from 'crypto';
 import { IncomingMessage, ServerResponse, send } from 'micri';
+import allowMethods from './allow-methods';
 import fetch from './fetch';
+import setVary from './set-vary';
 import { CACHE_CONTROL } from './config';
 import { File } from './graph-api-types';
 
@@ -21,6 +23,12 @@ function makeReqHeaders(req: IncomingMessage) {
 }
 
 export default async function sendFile(req: IncomingMessage, res: ServerResponse, file: File) {
+	// Some methods are not allowed here and some will need special
+	// handling.
+	if (!allowMethods(req, res)) {
+		return;
+	}
+
 	const data = await fetch(file['@microsoft.graph.downloadUrl'], {
 		method: req.method,
 		compress: false,
@@ -37,6 +45,7 @@ export default async function sendFile(req: IncomingMessage, res: ServerResponse
 	const len = data.headers.get('content-length');
 	const date = data.headers.get('date');
 
+	setVary(res);
 	if (transferEncoding) {
 		res.setHeader('transfer-encoding', transferEncoding);
 	}

@@ -1,5 +1,7 @@
 import { send, IncomingMessage, ServerResponse } from 'micri';
 import { parseAll } from '@hapi/accept';
+import allowMethods from './allow-methods';
+import setVary from './set-vary';
 import { File, Folder } from './graph-api-types';
 
 function getParent(path: string) {
@@ -43,6 +45,12 @@ export default function sendFileList(
 ) {
 	let types = ['*/*'];
 
+	// Some methods are not allowed here and some will need special
+	// handling.
+	if (!allowMethods(req, res)) {
+		return;
+	}
+
 	try {
 		const parsed = parseAll(req.headers);
 		types = parsed.mediaTypes;
@@ -51,6 +59,7 @@ export default function sendFileList(
 		console.error(err);
 	}
 
+	setVary(res);
 	if (types.includes('text/html')) {
 		return send(
 			res,
