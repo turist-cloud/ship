@@ -21,7 +21,14 @@ export type SiteConfig = {
 	customErrors?: {
 		[index: number]: string;
 	};
+	/**
+	 * Enable directory listings.
+	 */
 	dirListing?: boolean;
+	/**
+	 * Execute functions.
+	 */
+	functions?: boolean;
 };
 
 const dirCache = new LRU<string, Promise<Array<File | Folder>>>({

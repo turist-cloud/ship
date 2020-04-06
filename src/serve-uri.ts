@@ -2,11 +2,20 @@ import { normalize as pathNormalize } from 'path';
 import LRU from 'lru-cache';
 import { IncomingMessage, ServerResponse } from 'micri';
 import _apiFetch from './fetch-graph-api';
+import execFile from './exec-file';
 import getEnv from './get-env';
 import promiseCache from './promise-cache';
 import sendFile from './send-file';
 import sendFileList from './send-file-list';
-import { CACHE_SEC, DISABLE_FILE_LISTING, HIDDEN_FILES, PROTECTED_FILES } from './config';
+import {
+	CACHE_SEC,
+	ENABLE_FILE_LISTING,
+	ENABLE_FUNCTIONS,
+	FUNCTION_PATTERN,
+	HIDDEN_FILES,
+	INDEX_PATTERN,
+	PROTECTED_FILES,
+} from './config';
 import { File, Folder } from './graph-api-types';
 import { SiteConfig } from './get-site-config';
 import { sendError } from './error';
@@ -33,6 +42,14 @@ function buildUrl(host: string, path: string): string | null {
 	path = `/${host}${path}`;
 
 	return `${ROOT}${path}:`;
+}
+
+function isIndexFile(name: string) {
+	return INDEX_PATTERN.test(name) && PROTECTED_FILES.every((re) => !re.test(name.toLowerCase()));
+}
+
+function shouldExec(siteConfig: SiteConfig | null, name: string): boolean {
+	return (ENABLE_FUNCTIONS || !!siteConfig?.functions) && FUNCTION_PATTERN.test(name);
 }
 
 export default async function serveUri(
@@ -71,12 +88,6 @@ export default async function serveUri(
 		);
 	} else if (meta.folder) {
 		const { value: dir } = await apiFetch(`${graphUrl}/children`);
-
-		const isIndexFile = (name: string) => {
-			const s = name.toLowerCase();
-
-			return s.startsWith('index.') && PROTECTED_FILES.every((re) => !re.test(s));
-		};
 		const index = dir.find(
 			(o: File) =>
 				o.name &&
@@ -84,9 +95,13 @@ export default async function serveUri(
 				isIndexFile(o.name)
 		);
 		if (index) {
+			if (shouldExec(siteConfig, index.name)) {
+				return execFile(req, res, index);
+			}
+
 			return sendFile(req, res, index);
 		} else {
-			if (DISABLE_FILE_LISTING || siteConfig?.dirListing) {
+			if (ENABLE_FILE_LISTING || siteConfig?.dirListing) {
 				return sendError(
 					req,
 					res,
@@ -107,6 +122,10 @@ export default async function serveUri(
 			}
 		}
 	} else if (meta.file) {
+		if (shouldExec(siteConfig, meta.name)) {
+			return execFile(req, res, meta);
+		}
+
 		return sendFile(req, res, meta);
 	}
 
