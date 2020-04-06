@@ -43,7 +43,7 @@ blade on the left and click *New registration*.
   - `Files.Read.All`
   - Remove everything else
 
-![AAD Permissions](/aad-perms.png)
+![AAD Permissions](aad-perms.png)
 
 ### OneDrive or SharePoint Online
 
@@ -141,7 +141,7 @@ before doing this.
     3. At this point you may want to turn	on the *HTTPS Only* knob
 
 
-![Azure App environment](/azure-env.png)
+![Azure App environment](azure-env.png)
 
 Rinse and repeat. You can add as many domains as you want and the domains will
 be served from the respective folders in your OneDrive or SPO Document Library.
