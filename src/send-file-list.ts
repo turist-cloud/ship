@@ -1,10 +1,13 @@
 import { send, IncomingMessage, ServerResponse } from 'micri';
 import { parseAll } from '@hapi/accept';
-import allowMethods from './allow-methods';
+import allowedMethod from './allowed-method';
 import setVary from './set-vary';
 import { File, Folder } from './graph-api-types';
 
-function getParent(path: string) {
+/**
+ * Get path to the parent folder of path.
+ */
+function getParent(path: string): string {
 	const prev = path.split('/').slice(0, -1).join('/');
 
 	return prev.length === 0 ? '/' : prev;
@@ -42,12 +45,12 @@ export default function sendFileList(
 	res: ServerResponse,
 	pathname: string,
 	files: Array<File | Folder>
-) {
+): void {
 	let types = ['*/*'];
 
 	// Some methods are not allowed here and some will need special
 	// handling.
-	if (!allowMethods(req, res)) {
+	if (!allowedMethod(req, res)) {
 		return;
 	}
 

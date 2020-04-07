@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
 import { IncomingMessage, ServerResponse, send } from 'micri';
-import allowMethods from './allow-methods';
+import allowedMethod from './allowed-method';
 import fetch from './fetch';
 import setVary from './set-vary';
 import { CACHE_CONTROL } from './config';
@@ -22,10 +22,10 @@ function makeReqHeaders(req: IncomingMessage) {
 	return headers;
 }
 
-export default async function sendFile(req: IncomingMessage, res: ServerResponse, file: File) {
+export default async function sendFile(req: IncomingMessage, res: ServerResponse, file: File): Promise<void> {
 	// Some methods are not allowed here and some will need special
 	// handling.
-	if (!allowMethods(req, res)) {
+	if (!allowedMethod(req, res)) {
 		return;
 	}
 

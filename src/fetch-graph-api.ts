@@ -11,6 +11,19 @@ type OauthToken = {
 	access_token: string;
 };
 
+class GraphApiError extends Error {
+	method: string;
+	path: string;
+	responseBody: string;
+
+	constructor(path: string, opts: FetchOptions, res: Response, body: string, message: string) {
+		super(`${message} (${res.statusText})`);
+		this.method = opts.method || 'GET';
+		this.path = path;
+		this.responseBody = body;
+	}
+}
+
 const RESOURCE = 'https://graph.microsoft.com/';
 const [TENANT_ID, CLIENT_ID, CLIENT_SECRET] = getEnv('TENANT_ID', 'CLIENT_ID', 'CLIENT_SECRET');
 let tokenPromise: Promise<OauthToken> | null;
@@ -26,19 +39,6 @@ async function getToken(): Promise<OauthToken> {
 	});
 
 	return res.json();
-}
-
-class GraphApiError extends Error {
-	method: string;
-	path: string;
-	responseBody: string;
-
-	constructor(path: string, opts: FetchOptions, res: Response, body: string, message: string) {
-		super(`${message} (${res.statusText})`);
-		this.method = opts.method || 'GET';
-		this.path = path;
-		this.responseBody = body;
-	}
 }
 
 export default async function fetchAPI(path: string, opts: FetchOptions = {}) {

@@ -7,6 +7,9 @@ import { DirectoryListing, File, Folder } from './graph-api-types';
 
 const [ROOT] = getEnv('ROOT');
 
+/**
+ * SiteConfig can be set per each domain.
+ */
 export type SiteConfig = {
 	/**
 	 * Custom error page file paths.
