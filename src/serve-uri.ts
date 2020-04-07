@@ -7,15 +7,7 @@ import getEnv from './get-env';
 import promiseCache from './promise-cache';
 import sendFile from './send-file';
 import sendFileList from './send-file-list';
-import {
-	CACHE_SEC,
-	ENABLE_FILE_LISTING,
-	ENABLE_FUNCTIONS,
-	FUNCTION_PATTERN,
-	HIDDEN_FILES,
-	INDEX_PATTERN,
-	PROTECTED_FILES,
-} from './config';
+import { CACHE_SEC, FUNCTION_PATTERN, HIDDEN_FILES, INDEX_PATTERN, PROTECTED_FILES } from './config';
 import { File, Folder } from './graph-api-types';
 import { SiteConfig } from './get-site-config';
 import { sendError } from './error';
@@ -48,8 +40,8 @@ function isIndexFile(name: string) {
 	return INDEX_PATTERN.test(name) && PROTECTED_FILES.every((re) => !re.test(name.toLowerCase()));
 }
 
-function shouldExec(siteConfig: SiteConfig | null, name: string): boolean {
-	return (ENABLE_FUNCTIONS || !!siteConfig?.functions) && FUNCTION_PATTERN.test(name);
+function shouldExec(siteConfig: SiteConfig, name: string): boolean {
+	return !!siteConfig.functions && FUNCTION_PATTERN.test(name);
 }
 
 export default async function serveUri(
@@ -57,7 +49,7 @@ export default async function serveUri(
 	res: ServerResponse,
 	host: string,
 	pathname: string,
-	siteConfig: SiteConfig | null
+	siteConfig: SiteConfig
 ): Promise<void> {
 	const graphUrl = buildUrl(host, pathname);
 	if (graphUrl === null) {
@@ -101,7 +93,7 @@ export default async function serveUri(
 
 			return sendFile(req, res, index);
 		} else {
-			if (ENABLE_FILE_LISTING || siteConfig?.dirListing) {
+			if (siteConfig.dirListing) {
 				return sendError(
 					req,
 					res,

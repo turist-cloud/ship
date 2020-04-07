@@ -11,6 +11,12 @@ export interface TuristError {
 	[x: string]: any;
 }
 
+const safeSiteConfig: SiteConfig = {
+	customErrors: [],
+	dirListing: false,
+	functions: false,
+};
+
 /**
  * Send a standardized error to the HTTP client.
  * @param req is the incoming request.
@@ -22,9 +28,13 @@ export async function sendError(
 	res: ServerResponse,
 	statusCode: number,
 	error: TuristError,
-	siteConfig?: SiteConfig | null
+	siteConfig?: SiteConfig
 ): Promise<void> {
 	let types = ['*/*'];
+
+	if (!siteConfig) {
+		siteConfig = safeSiteConfig;
+	}
 
 	if (!error.code) {
 		throw new Error('Error "code" is missing');
@@ -44,11 +54,11 @@ export async function sendError(
 
 	setVary(res);
 	if (types.includes('text/html')) {
-		const customErrors = siteConfig?.customErrors;
+		const customErrors = siteConfig.customErrors;
 		const customPage = customErrors && customErrors[statusCode];
 		if (customPage) {
 			const host = req.headers.host?.split(':')[0] || '';
-			return serveUri(req, res, host, customPage, { dirListing: false });
+			return serveUri(req, res, host, customPage, safeSiteConfig);
 		}
 
 		return send(
