@@ -17,19 +17,23 @@ optional.
 
 | Name            | Description                           |
 |-----------------|---------------------------------------|
-| `customErrors`  | Custom error pages (or functions).    |
+| `customErrors`  | Custom error pages.                   |
 | `dirListing`    | Enable or disable directory listings. |
 | `functions`     | Enable the functions feature.         |
+| `functionsEnv`  | Apply environment variables.          |
 
 **example.com.json:**
 
 ```json
 {
-	"customErrors": {
-		"404": "/404.html",
-		"500": "/500/index.html"
-	},
-	"dirListing": true,
-	"functions": true
+  "customErrors": {
+    "404": "/404.html",
+    "500": "/500/index.html"
+  },
+  "dirListing": true,
+  "functions": true,
+  "functionsEnv": {
+    "NODE_ENV": "production"
+  }
 }
 ```

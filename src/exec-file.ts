@@ -5,6 +5,7 @@ import { IncomingMessage, ServerResponse, MicriHandler, withWorker } from 'micri
 import fetch from './fetch';
 import promiseCache from './promise-cache';
 import { File } from './graph-api-types';
+import { SiteConfig } from './get-site-config';
 
 const getTempFilePath = (ctag: string) => `/tmp/ship-${Buffer.from(ctag).toString('base64')}`;
 
@@ -36,6 +37,7 @@ setInterval(() => {
 	handlerCache.prune();
 }, ms('30m'));
 
+// The following environment variables will be inherited from the parent.
 const ALLOWED_ENV = new Set([
 	'HOME',
 	'HOSTNAME',
@@ -50,18 +52,21 @@ const ALLOWED_ENV = new Set([
 	'USER',
 ]);
 
-function makeEnv(): { [index: string]: string | undefined } {
+function makeEnv(siteConfig: SiteConfig): { [index: string]: string | undefined } {
 	const pEnv = process.env;
 
 	return Object.keys(pEnv)
 		.filter((key: string) => ALLOWED_ENV.has(key))
-		.reduce((obj: { [index: string]: string | undefined }, key: string) => {
-			obj[key] = pEnv[key];
-			return obj;
-		}, {});
+		.reduce(
+			(obj: { [index: string]: string | undefined }, key: string) => {
+				obj[key] = pEnv[key];
+				return obj;
+			},
+			{ ...siteConfig.functionsEnv }
+		);
 }
 
-export default async function execFile(req: IncomingMessage, res: ServerResponse, file: File) {
+export default async function execFile(req: IncomingMessage, res: ServerResponse, siteConfig: SiteConfig, file: File) {
 	const getHandler = promiseCache<MicriHandler>(handlerCache, async (ctag: string) => {
 		// eslint-disable-next-line no-console
 		console.log(`Fetching function: ${ctag}`);
@@ -75,7 +80,7 @@ export default async function execFile(req: IncomingMessage, res: ServerResponse
 
 		return new Promise((resolve, reject) => {
 			data.body.on('end', () => {
-				resolve(withWorker(tempPath, { env: makeEnv() }));
+				resolve(withWorker(tempPath, { env: makeEnv(siteConfig) }));
 			});
 
 			data.body.on('error', (err) => {

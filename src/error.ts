@@ -15,6 +15,7 @@ const safeSiteConfig: SiteConfig = {
 	customErrors: [],
 	dirListing: false,
 	functions: false,
+	functionsEnv: {},
 };
 
 /**

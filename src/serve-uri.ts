@@ -88,7 +88,7 @@ export default async function serveUri(
 		);
 		if (index) {
 			if (shouldExec(siteConfig, index.name)) {
-				return execFile(req, res, index);
+				return execFile(req, res, siteConfig, index);
 			}
 
 			return sendFile(req, res, index);
@@ -115,7 +115,7 @@ export default async function serveUri(
 		}
 	} else if (meta.file) {
 		if (shouldExec(siteConfig, meta.name)) {
-			return execFile(req, res, meta);
+			return execFile(req, res, siteConfig, meta);
 		}
 
 		return sendFile(req, res, meta);

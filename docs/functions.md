@@ -56,3 +56,6 @@ like any URL. If the function file is called `index.fjs` then it will act like
 it was an index of the folder.
 
 See [examples](examples) for more usage examples.
+
+Functions have some configuration parameters available in the `siteConfig` which
+are documented [here](config.md).

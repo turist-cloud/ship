@@ -35,12 +35,19 @@ export type SiteConfig = {
 	 * Execute functions.
 	 */
 	functions: boolean;
+	/**
+	 * Env applied to the functions on this site.
+	 */
+	functionsEnv: {
+		[index: string]: string;
+	};
 };
 
 const defaultSiteConfig: SiteConfig = {
 	customErrors: {},
 	dirListing: defaultConfig.ENABLE_DIR_LISTING,
 	functions: defaultConfig.ENABLE_FUNCTIONS,
+	functionsEnv: {},
 };
 
 const dirCache = new LRU<string, Promise<Array<File | Folder>>>({
