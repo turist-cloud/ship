@@ -19,7 +19,7 @@ Ship websites like it's the 90's again! FTP FTW
 
 Upload files:
 
-![Ship](/ship.gif)
+![Ship](/docs/ship.gif)
 
 
 And that's it, you have already shipped a new website  🎉
