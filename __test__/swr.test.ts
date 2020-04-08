@@ -290,3 +290,5 @@ describe('revalidation', () => {
 		expect(onError).toHaveBeenCalledTimes(3);
 	});
 });
+
+// TODO test that revalidating refreshes the TTL

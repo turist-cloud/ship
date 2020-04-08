@@ -9,8 +9,20 @@ export type SWROpts<T extends object> = {
 	length?: (n: T, key: string) => number;
 	revalidateAfter: number;
 	revalidate: RevalidateFn<T>;
-	onError?: (err: Error) => void;
+	onError?: (err: SWRError) => void;
+	dispose?: (key: string, n: T) => void;
 };
+
+export class SWRError extends Error {
+	key: string;
+	originalError: Error;
+
+	constructor(message: string, key: string, originalError: Error) {
+		super(message);
+		this.key = key;
+		this.originalError = originalError;
+	}
+}
 
 /**
  * A stale-while-revalidate LRU cache.
@@ -20,7 +32,7 @@ export default class SWR<T extends object> implements AnyCache {
 	#revalidateMap: WeakMap<any, { revalidateAfterTs: number; revalidating: boolean }>;
 	#revalidateAfter: number;
 	#revalidate: RevalidateFn<T>;
-	#onError?: (err: Error) => void;
+	#onError?: (err: SWRError) => void;
 
 	constructor(opts: SWROpts<T>) {
 		if (typeof opts.maxAge !== 'number' || typeof opts.revalidateAfter !== 'number') {
@@ -36,6 +48,7 @@ export default class SWR<T extends object> implements AnyCache {
 			updateAgeOnGet: true,
 			noDisposeOnSet: false,
 			length: opts.length,
+			dispose: opts.dispose,
 		});
 		this.#revalidateMap = new WeakMap();
 		this.#revalidateAfter = opts.revalidateAfter;
@@ -59,16 +72,17 @@ export default class SWR<T extends object> implements AnyCache {
 			process.nextTick(() => {
 				this.#revalidate(key, v)
 					.then((nextV) => {
-						if (nextV === null || nextV === undefined) {
+						if (nextV == null) {
 							this.del(key);
-						} else if (nextV !== v) {
+						} else {
 							this.set(key, nextV);
 						}
 					})
 					.catch((err) => {
 						if (this.#onError) {
-							this.#onError(err);
+							this.#onError(new SWRError('Revalidation failed', key, err));
 						} else {
+							// eslint-disable-next-line no-console
 							console.error(`Revalidation for "${key}" failed:`, err);
 						}
 					})
@@ -90,5 +104,9 @@ export default class SWR<T extends object> implements AnyCache {
 
 	del(key: string) {
 		return this.#lru.del(key);
+	}
+
+	prune() {
+		this.#lru.prune();
 	}
 }

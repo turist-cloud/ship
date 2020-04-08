@@ -65,6 +65,8 @@ export default async function fetchAPI(path: string, opts: FetchOptions = {}) {
 
 	if (res.status === 404) {
 		return null;
+	} else if (res.status === 304) {
+		return { status: 'not_modified' };
 	} else if (res.status < 200 || res.status >= 300) {
 		let message = 'Fetch failed';
 		let body = 'Could not read body';
