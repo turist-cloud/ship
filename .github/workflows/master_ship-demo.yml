@@ -25,6 +25,7 @@ jobs:
         yarn install
         yarn build
         yarn lint
+        yarn test
         yarn install --production
 
     - name: 'Deploy to Azure Web App'
