@@ -1,4 +1,4 @@
-interface AnyCache<T = any> {
+export interface AnyCache<T = any> {
 	get: (key: string) => T | undefined;
 	set: (key: string, value: T) => any;
 	del: (key: string) => any;
