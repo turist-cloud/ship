@@ -9,8 +9,8 @@ import promiseCache from './promise-cache';
 import { File } from './graph-api-types';
 import { SiteConfig } from './get-site-config';
 
-const MAX_AGE = ms('1m');
-const REVALIDATE_AFTER = ms('1s');
+const MAX_AGE = ms('15m');
+const REVALIDATE_AFTER = ms('30s');
 
 const debug = createDebug('exec-file');
 const getTempFilePath = (ctag: string) => `/tmp/ship-${Buffer.from(ctag).toString('base64')}`;
