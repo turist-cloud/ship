@@ -59,6 +59,7 @@ const handlerCache = new SWR<Promise<MicriHandler>>({
 		});
 	},
 	onError: (err: SWRError) => {
+		// eslint-disable-next-line no-console
 		console.error(`Revalidation failed for ${parseCtagFromCacheKey(err.key)}:`, err.originalError);
 	},
 	dispose: (key: string) => {
