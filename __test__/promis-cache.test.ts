@@ -12,14 +12,14 @@ function createFakeCache() {
 		}),
 		del: jest.fn((key: any) => {
 			delete data[JSON.stringify(key)];
-		})
+		}),
 	};
 }
 
 describe('same args in all calls', () => {
 	test('first call works as expected', async () => {
 		const mock = jest.fn((_arg) => {
-			return new Promise((resolve) => resolve(true))
+			return new Promise((resolve) => resolve(true));
 		});
 
 		const cache = createFakeCache();
@@ -37,7 +37,7 @@ describe('same args in all calls', () => {
 
 	test('second synchronous call is cached', async () => {
 		const mock = jest.fn((_arg) => {
-			return new Promise((resolve) => resolve(true))
+			return new Promise((resolve) => resolve(true));
 		});
 
 		const cache = createFakeCache();
@@ -59,7 +59,7 @@ describe('same args in all calls', () => {
 
 	test('concurrent calls will resolve only a single cached promise', async () => {
 		const mock = jest.fn((_arg) => {
-			return new Promise((resolve) => setTimeout(() => resolve(true), 500))
+			return new Promise((resolve) => setTimeout(() => resolve(true), 500));
 		});
 
 		const cache = createFakeCache();
@@ -69,7 +69,7 @@ describe('same args in all calls', () => {
 			memoMock('hello'),
 			memoMock('hello'),
 			memoMock('hello'),
-			memoMock('hello')
+			memoMock('hello'),
 		]);
 
 		expect(res1).toBe(true);
@@ -87,7 +87,7 @@ describe('same args in all calls', () => {
 describe('trigger multiple promises', () => {
 	test('concurrent calls with different args will resolve with different promises', async () => {
 		const mock = jest.fn((arg) => {
-			return new Promise((resolve) => setTimeout(() => resolve(arg), 500))
+			return new Promise((resolve) => setTimeout(() => resolve(arg), 500));
 		});
 
 		const cache = createFakeCache();
@@ -97,7 +97,7 @@ describe('trigger multiple promises', () => {
 			memoMock('hello'),
 			memoMock('hello'),
 			memoMock('hi'),
-			memoMock('hi')
+			memoMock('hi'),
 		]);
 
 		expect(res1).toBe('hello');
@@ -114,7 +114,7 @@ describe('trigger multiple promises', () => {
 describe('error handling', () => {
 	test('a rejected promise is deleted', async () => {
 		const mock = jest.fn((_arg) => {
-			return new Promise((_, reject) => setTimeout(() => reject(new Error()), 1))
+			return new Promise((_, reject) => setTimeout(() => reject(new Error()), 1));
 		});
 
 		const cache = createFakeCache();

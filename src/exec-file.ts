@@ -14,30 +14,28 @@ const REVALIDATE_AFTER = ms('30s');
 
 const debug = createDebug('exec-file');
 const getTempFilePath = (ctag: string) => `/tmp/ship-${Buffer.from(ctag).toString('base64')}`;
-const parseCtagFromCacheKey = (key: string) => JSON.parse(key)[1];
+const parseIdFromCacheKey = (key: string) => JSON.parse(key)[1];
 
-const handlerMetaCache = new WeakMap<
-	MicriHandler,
-	{ siteConfig: SiteConfig; driveId: string; id: string; etag: string }
->();
+const handlerMetaCache = new WeakMap<MicriHandler, { siteConfig: SiteConfig; driveId: string; etag: string }>();
 const handlerCache = new SWR<Promise<MicriHandler>>({
 	max: 500, // TODO the cache size should be configurable (and somehow in MB)
 	maxAge: MAX_AGE,
 	revalidateAfter: REVALIDATE_AFTER,
 	revalidate: (key: string, v: Promise<MicriHandler>): Promise<Promise<MicriHandler> | null> => {
 		return new Promise(async (resolve, reject) => {
-			const ctag = parseCtagFromCacheKey(key);
+			const id = parseIdFromCacheKey(key);
+			// TODO catch
 			const cached = handlerMetaCache.get(await v);
 			if (!cached) {
 				// eslint-disable-next-line no-console
-				console.error(`File handler cache is broken or not yet ready ${ctag}`);
+				console.error(`File handler cache is broken or not yet ready ${id}`);
 
 				return resolve(v);
 			}
 
-			const { siteConfig, driveId, id, etag } = cached;
+			const { siteConfig, driveId, etag } = cached;
 
-			debug(`Revalidating ${ctag} from ${driveId}:${id}`);
+			debug(`Revalidating ${etag} from ${driveId}:${id}`);
 
 			try {
 				const file = await fetchAPI(`/drives/${driveId}/items/${id}`, {
@@ -47,12 +45,12 @@ const handlerCache = new SWR<Promise<MicriHandler>>({
 				});
 
 				if (file.status === 'not_modified') {
-					debug(`No changes to ${ctag}`);
+					debug(`No changes to ${id}`);
 					return resolve(v);
 				}
 
-				debug(`Found new ${ctag} => ${file.cTag}`);
-				return resolve(getHandler(siteConfig, file, ctag));
+				debug(`Found new ${etag} => ${file.eTag}`);
+				return resolve(getHandler(siteConfig, file));
 			} catch (err) {
 				reject(err);
 			}
@@ -60,22 +58,7 @@ const handlerCache = new SWR<Promise<MicriHandler>>({
 	},
 	onError: (err: SWRError) => {
 		// eslint-disable-next-line no-console
-		console.error(`Revalidation failed for ${parseCtagFromCacheKey(err.key)}:`, err.originalError);
-	},
-	dispose: (key: string) => {
-		const ctag = parseCtagFromCacheKey(key);
-		const tempPath = getTempFilePath(ctag);
-
-		try {
-			// TODO This is currently dangerous if an old files is restored in
-			// OneDrive!
-			//fs.unlinkSync(tempPath);
-		} catch (err) {
-			err.message = `Failed to unlink "${tempPath}": ${err.message}`;
-
-			// eslint-disable-next-line no-console
-			console.error(err);
-		}
+		console.error(`Revalidation failed for ${parseIdFromCacheKey(err.key)}:`, err.originalError);
 	},
 });
 
@@ -113,11 +96,11 @@ function makeEnv(siteConfig: SiteConfig): { [index: string]: string | undefined 
 		);
 }
 
-async function getHandler(siteConfig: SiteConfig, file: File, ctag: string): Promise<MicriHandler> {
+async function getHandler(siteConfig: SiteConfig, file: File): Promise<MicriHandler> {
 	// eslint-disable-next-line no-console
-	console.log(`Fetching function: ${ctag}`);
+	console.log(`Fetching function: ${file.id}${file.cTag}`);
 
-	const tempPath = getTempFilePath(ctag);
+	const tempPath = getTempFilePath(file.cTag);
 	// TODO Check if we already have the file
 	const writeStream = fs.createWriteStream(tempPath);
 
@@ -138,7 +121,6 @@ async function getHandler(siteConfig: SiteConfig, file: File, ctag: string): Pro
 		handlerMetaCache.set(handler, {
 			siteConfig,
 			driveId: file.parentReference.driveId,
-			id: file.id,
 			etag: file.eTag,
 		});
 	});
@@ -147,10 +129,10 @@ async function getHandler(siteConfig: SiteConfig, file: File, ctag: string): Pro
 }
 
 export default async function execFile(req: IncomingMessage, res: ServerResponse, siteConfig: SiteConfig, file: File) {
-	const getHandlerCached = promiseCache<MicriHandler>(handlerCache, async (siteConfig: SiteConfig, ctag: string) =>
-		getHandler(siteConfig, file, ctag)
+	const getHandlerCached = promiseCache<MicriHandler>(handlerCache, async (siteConfig: SiteConfig, _id: string) =>
+		getHandler(siteConfig, file)
 	);
-	const handler = await getHandlerCached(siteConfig, file.cTag);
+	const handler = await getHandlerCached(siteConfig, file.id);
 
 	return handler(req, res, null);
 }
