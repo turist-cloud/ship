@@ -7,7 +7,7 @@ import setVary from './set-vary';
 import { CACHE_CONTROL } from './config';
 import { File } from './graph-api-types';
 import { SiteConfig } from './get-site-config';
-import { sendNotFoundError } from './error';
+import { sendNotFoundError, sendError } from './error';
 import { weakEtagMatch } from './etag-match';
 
 function makeReqHeaders(req: IncomingMessage) {
@@ -45,6 +45,17 @@ const PASSED_HEADERS = [
 	'date',
 ];
 
+function joinHeaderValues(header: string | string[] | undefined): string | null {
+	if (header == null) {
+		return null;
+	}
+	if (typeof header === 'string') {
+		return header;
+	}
+
+	return header.join(', ');
+}
+
 export default async function sendFile(
 	req: IncomingMessage,
 	res: ServerResponse,
@@ -59,13 +70,20 @@ export default async function sendFile(
 
 	const reqHeaders = makeReqHeaders(req);
 	const etag = `W/"${createHash('sha3-224').update(file.cTag).digest('hex')}"`;
-	const ifNoneMatch = req.headers['if-none-match'];
+	const ifNoneMatch = joinHeaderValues(req.headers['if-none-match']);
+	const ifRange = joinHeaderValues(req.headers['if-range']);
 
 	// RFC 7232, section 3.2: If-None-Match
 	// The downloadUrl endpoint doesn't support If-None-Match so we hack around
 	// it by using a HEAD request.
 	const etagMatch = ifNoneMatch && weakEtagMatch(ifNoneMatch, etag);
 	const method = etagMatch ? 'HEAD' : req.method;
+
+	// RFC 7232, section 6: Precedence
+	// Note: We only support ETag but not Last-Modified validator
+	if ((!ifNoneMatch || !etagMatch) && ifRange && req.headers['range'] && !weakEtagMatch(ifRange, etag)) {
+		delete reqHeaders.range;
+	}
 
 	const data = await fetch(file['@microsoft.graph.downloadUrl'], {
 		method,
@@ -75,8 +93,33 @@ export default async function sendFile(
 		headers: reqHeaders,
 	});
 
-	if (data.status === 404) {
-		return sendNotFoundError(req, res, siteConfig);
+	switch (data.status) {
+		case 400:
+			return sendError(
+				req,
+				res,
+				500,
+				{
+					code: 'bad_request',
+					message: 'Bad request',
+				},
+				siteConfig
+			);
+		case 404:
+			return sendNotFoundError(req, res, siteConfig);
+		case 401: // TODO Invalidate cache?
+		case 403: // TODO Invalidate cache?
+		case 500:
+			return sendError(
+				req,
+				res,
+				500,
+				{
+					code: 'internal_server_error',
+					message: 'Internal server error',
+				},
+				siteConfig
+			);
 	}
 
 	setVary(res);
