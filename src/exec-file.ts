@@ -24,11 +24,19 @@ const handlerCache = new SWR<Promise<MicriHandler>>({
 	revalidate: (key: string, v: Promise<MicriHandler>): Promise<Promise<MicriHandler> | null> => {
 		return new Promise(async (resolve, reject) => {
 			const id = parseIdFromCacheKey(key);
-			// TODO catch
-			const cached = handlerMetaCache.get(await v);
-			if (!cached) {
+			let cached;
+
+			try {
+				cached = handlerMetaCache.get(await v);
+				if (!cached) {
+					// eslint-disable-next-line no-console
+					console.error(`File handler cache is broken or not yet ready ${id}`);
+
+					return resolve(v);
+				}
+			} catch (err) {
 				// eslint-disable-next-line no-console
-				console.error(`File handler cache is broken or not yet ready ${id}`);
+				console.error(err);
 
 				return resolve(v);
 			}
@@ -107,25 +115,23 @@ async function getHandler(siteConfig: SiteConfig, file: File): Promise<MicriHand
 	const data = await fetch(file['@microsoft.graph.downloadUrl']);
 	data.body.pipe(writeStream);
 
-	const handlerP = new Promise<MicriHandler>((resolve, reject) => {
+	return new Promise<MicriHandler>((resolve, reject) => {
 		data.body.on('end', () => {
-			resolve(withWorker(tempPath, { env: makeEnv(siteConfig) }));
+			const handler = withWorker(tempPath, { env: makeEnv(siteConfig) });
+
+			handlerMetaCache.set(handler, {
+				siteConfig,
+				driveId: file.parentReference.driveId,
+				etag: file.eTag,
+			});
+
+			resolve(handler);
 		});
 
 		data.body.on('error', (err) => {
 			reject(err);
 		});
 	});
-
-	handlerP.then((handler) => {
-		handlerMetaCache.set(handler, {
-			siteConfig,
-			driveId: file.parentReference.driveId,
-			etag: file.eTag,
-		});
-	});
-
-	return handlerP;
 }
 
 export default async function execFile(req: IncomingMessage, res: ServerResponse, siteConfig: SiteConfig, file: File) {
