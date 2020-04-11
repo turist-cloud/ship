@@ -83,3 +83,16 @@ export async function sendError(
 		});
 	}
 }
+
+export function sendNotFoundError(req: IncomingMessage, res: ServerResponse, siteConfig?: SiteConfig) {
+	return sendError(
+		req,
+		res,
+		404,
+		{
+			code: 'not_found',
+			message: 'Page not found',
+		},
+		siteConfig
+	);
+}

@@ -6,7 +6,7 @@ const ALLOW_METHODS = ['GET', 'HEAD', 'OPTIONS'];
 const ALLOW_METHODS_STR = ALLOW_METHODS.join(', ');
 
 const ALLOW_ORIGIN = '*';
-const ALLOW_REQ_HEADERS = 'Accept, Accept-Encoding, Range';
+const ALLOW_REQ_HEADERS = 'Accept, Accept-Encoding, Range, If-None-Match';
 const EXPOSE_RES_HEADERS =
 	'Accept-Ranges, Content-Range, Content-Length, Content-Type, Content-Encoding, Content-Disposition, Date, ETag, Transfer-Encoding, Server';
 

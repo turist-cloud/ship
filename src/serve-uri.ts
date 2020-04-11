@@ -10,7 +10,7 @@ import sendFileList from './send-file-list';
 import { CACHE_SEC, FUNCTION_PATTERN, HIDDEN_FILES, INDEX_PATTERN, PROTECTED_FILES } from './config';
 import { File, Folder } from './graph-api-types';
 import { SiteConfig } from './get-site-config';
-import { sendError } from './error';
+import { sendError, sendNotFoundError } from './error';
 
 const [ROOT] = getEnv('ROOT');
 const metaCache = new LRU<string, any>({
@@ -68,16 +68,7 @@ export default async function serveUri(
 	const meta = await apiFetch(graphUrl);
 
 	if (!meta) {
-		return sendError(
-			req,
-			res,
-			404,
-			{
-				code: 'not_found',
-				message: 'Page not found',
-			},
-			siteConfig
-		);
+		return sendNotFoundError(req, res, siteConfig);
 	} else if (meta.folder) {
 		const { value: dir } = await apiFetch(`${graphUrl}/children`);
 		const index = dir.find(
@@ -91,19 +82,10 @@ export default async function serveUri(
 				return execFile(req, res, siteConfig, index);
 			}
 
-			return sendFile(req, res, index);
+			return sendFile(req, res, index, siteConfig);
 		} else {
 			if (siteConfig.dirListing) {
-				return sendError(
-					req,
-					res,
-					404,
-					{
-						code: 'not_found',
-						message: 'Page not found',
-					},
-					siteConfig
-				);
+				return sendNotFoundError(req, res, siteConfig);
 			} else {
 				return sendFileList(
 					req,
@@ -118,17 +100,8 @@ export default async function serveUri(
 			return execFile(req, res, siteConfig, meta);
 		}
 
-		return sendFile(req, res, meta);
+		return sendFile(req, res, meta, siteConfig);
 	}
 
-	return sendError(
-		req,
-		res,
-		404,
-		{
-			code: 'not_found',
-			message: 'Page not found',
-		},
-		siteConfig
-	);
+	return sendNotFoundError(req, res, siteConfig);
 }
