@@ -41,6 +41,7 @@ export type SiteConfig = {
 	functionsEnv: {
 		[index: string]: string;
 	};
+	functionsPattern: RegExp;
 };
 
 const defaultSiteConfig: SiteConfig = {
@@ -48,6 +49,7 @@ const defaultSiteConfig: SiteConfig = {
 	dirListing: defaultConfig.ENABLE_DIR_LISTING,
 	functions: defaultConfig.ENABLE_FUNCTIONS,
 	functionsEnv: {},
+	functionsPattern: defaultConfig.FUNCTIONS_PATTERN,
 };
 
 const dirCache = new LRU<string, Promise<Array<File | Folder>>>({

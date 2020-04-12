@@ -50,10 +50,12 @@ and finally:
 $ ncc build -m -s ./src/index.ts
 ```
 
-This will create a file `dist/index.js` which can be then copied and rename as
-`myfunc.fjs` into a domain folder. The function can be then requested over HTTP
-like any URL. If the function file is called `index.fjs` then it will act like
-it was an index of the folder.
+This will create a file `dist/index.js` which can be then copied (and possibly
+renamed) into a folder named `/api` under a domain folder (if using the default
+pattern). The function can be then requested over HTTP like any URL. If the
+function file is called `index.js` then it will act like it was an index of the
+folder. The regular expression pattern for matching functions can be configured
+globally as well as per site.
 
 See [examples](examples) for more usage examples.
 

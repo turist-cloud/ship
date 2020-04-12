@@ -1,4 +1,4 @@
-import { normalize as pathNormalize } from 'path';
+import { normalize as _pathNormalize } from 'path';
 import LRU from 'lru-cache';
 import { IncomingMessage, ServerResponse } from 'micri';
 import _apiFetch from './fetch-graph-api';
@@ -7,7 +7,7 @@ import getEnv from './get-env';
 import promiseCache from './promise-cache';
 import sendFile from './send-file';
 import sendFileList from './send-file-list';
-import { CACHE_SEC, FUNCTION_PATTERN, HIDDEN_FILES, INDEX_PATTERN, PROTECTED_FILES } from './config';
+import { CACHE_SEC, HIDDEN_FILES, INDEX_PATTERN, PROTECTED_FILES } from './config';
 import { File, Folder } from './graph-api-types';
 import { SiteConfig } from './get-site-config';
 import { sendError, sendNotFoundError } from './error';
@@ -24,24 +24,27 @@ function removeTrailing(str: string, ch: string): string {
 	return !str.endsWith(ch) ? str : removeTrailing(str.slice(0, -1), ch);
 }
 
+function normalizePath(path: string): string {
+	path = _pathNormalize(path);
+	path = removeTrailing(path, '/');
+
+	return path;
+}
+
 function buildUrl(host: string, path: string): string | null {
 	if (path.includes(':')) {
 		return null;
 	}
 
-	path = pathNormalize(path);
-	path = removeTrailing(path, '/');
-	path = `/${host}${path}`;
-
-	return `${ROOT}${path}:`;
+	return `${ROOT}/${host}${path}:`;
 }
 
 function isIndexFile(name: string) {
 	return INDEX_PATTERN.test(name) && PROTECTED_FILES.every((re) => !re.test(name.toLowerCase()));
 }
 
-function shouldExec(siteConfig: SiteConfig, name: string): boolean {
-	return !!siteConfig.functions && FUNCTION_PATTERN.test(name);
+function shouldExec(siteConfig: SiteConfig, path: string): boolean {
+	return !!siteConfig.functions && siteConfig.functionsPattern.test(path);
 }
 
 export default async function serveUri(
@@ -51,7 +54,8 @@ export default async function serveUri(
 	pathname: string,
 	siteConfig: SiteConfig
 ): Promise<void> {
-	const graphUrl = buildUrl(host, pathname);
+	const normalizedPath = normalizePath(pathname);
+	const graphUrl = buildUrl(host, normalizedPath);
 	if (graphUrl === null) {
 		sendError(
 			req,
@@ -78,7 +82,7 @@ export default async function serveUri(
 				isIndexFile(o.name)
 		);
 		if (index) {
-			if (shouldExec(siteConfig, index.name)) {
+			if (shouldExec(siteConfig, `${normalizedPath}/${index.name}`)) {
 				return execFile(req, res, siteConfig, index);
 			}
 
@@ -90,13 +94,13 @@ export default async function serveUri(
 				return sendFileList(
 					req,
 					res,
-					pathname,
+					normalizedPath,
 					dir.filter((e: File | Folder) => HIDDEN_FILES.every((re) => !re.test(e.name.toLowerCase())))
 				);
 			}
 		}
 	} else if (meta.file) {
-		if (shouldExec(siteConfig, meta.name)) {
+		if (shouldExec(siteConfig, `${normalizedPath}/${meta.name}`)) {
 			return execFile(req, res, siteConfig, meta);
 		}
 

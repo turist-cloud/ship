@@ -16,6 +16,7 @@ const safeSiteConfig: SiteConfig = {
 	dirListing: false,
 	functions: false,
 	functionsEnv: {},
+	functionsPattern: /^$/,
 };
 
 /**
