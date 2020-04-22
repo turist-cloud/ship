@@ -1,4 +1,4 @@
-import fs from 'fs';
+import vm from 'vm';
 import ms from 'ms';
 import createDebug from 'debug';
 import { IncomingMessage, ServerResponse, MicriHandler, withWorker } from 'micri';
@@ -13,7 +13,6 @@ const MAX_AGE = ms('15m');
 const REVALIDATE_AFTER = ms('30s');
 
 const debug = createDebug('exec-file');
-const getTempFilePath = (ctag: string) => `/tmp/ship-${Buffer.from(ctag).toString('base64')}`;
 const parseIdFromCacheKey = (key: string) => JSON.parse(key)[1];
 
 const handlerMetaCache = new WeakMap<MicriHandler, { siteConfig: SiteConfig; driveId: string; etag: string }>();
@@ -108,30 +107,36 @@ async function getHandler(siteConfig: SiteConfig, file: File): Promise<MicriHand
 	// eslint-disable-next-line no-console
 	console.log(`Fetching function: ${file.id}${file.cTag}`);
 
-	const tempPath = getTempFilePath(file.cTag);
-	// TODO Check if we already have the file
-	const writeStream = fs.createWriteStream(tempPath);
-
-	const data = await fetch(file['@microsoft.graph.downloadUrl']);
-	data.body.pipe(writeStream);
-
-	return new Promise<MicriHandler>((resolve, reject) => {
-		data.body.on('end', () => {
-			const handler = withWorker(tempPath, { env: makeEnv(siteConfig) });
-
-			handlerMetaCache.set(handler, {
-				siteConfig,
-				driveId: file.parentReference.driveId,
-				etag: file.eTag,
-			});
-
-			resolve(handler);
-		});
-
-		data.body.on('error', (err) => {
-			reject(err);
-		});
+	const resFile = await fetch(file['@microsoft.graph.downloadUrl']);
+	const buf = await resFile.buffer();
+	const code = buf.toString();
+	const script = new vm.Script(code);
+	const data = script.createCachedData();
+	const jsHandler = withWorker(`(req, res, opts) => {
+	const vm = require('vm');
+	const s = new vm.Script(opts.code, { filename: opts.filename, cachedData: opts.data });
+	const m = s.runInThisContext();
+	return m.default ? m.default(req, res) : m(req, res);
+}`, {
+		env: makeEnv(siteConfig),
+		eval: true,
 	});
+
+	const handler: MicriHandler = (req: IncomingMessage, res: ServerResponse) => {
+		return jsHandler(req, res, {
+			filename: file.name,
+			code,
+			data,
+		});
+	};
+
+	handlerMetaCache.set(handler, {
+		siteConfig,
+		driveId: file.parentReference.driveId,
+		etag: file.eTag,
+	});
+
+	return handler;
 }
 
 export default async function execFile(req: IncomingMessage, res: ServerResponse, siteConfig: SiteConfig, file: File) {

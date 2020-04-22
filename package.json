@@ -17,7 +17,7 @@
     "content-type": "1.0.4",
     "debug": "4.1.1",
     "lru-cache": "5.1.1",
-    "micri": "4.1.0",
+    "micri": "4.1.1",
     "ms": "2.1.2",
     "node-fetch": "2.6.0"
   },
