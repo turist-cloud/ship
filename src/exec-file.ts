@@ -108,8 +108,7 @@ async function getHandler(siteConfig: SiteConfig, file: File): Promise<MicriHand
 	console.log(`Fetching function: ${file.id}${file.cTag}`);
 
 	const resFile = await fetch(file['@microsoft.graph.downloadUrl']);
-	const buf = await resFile.buffer();
-	const code = buf.toString();
+	const code = await resFile.text();
 	const script = new vm.Script(code, { filename: file.name });
 	const data = script.createCachedData();
 	const jsHandler = withWorker(
