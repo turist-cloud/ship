@@ -112,15 +112,18 @@ async function getHandler(siteConfig: SiteConfig, file: File): Promise<MicriHand
 	const code = buf.toString();
 	const script = new vm.Script(code);
 	const data = script.createCachedData();
-	const jsHandler = withWorker(`(req, res, opts) => {
+	const jsHandler = withWorker(
+		`(req, res, opts) => {
 	const vm = require('vm');
 	const s = new vm.Script(opts.code, { filename: opts.filename, cachedData: opts.data });
 	const m = s.runInThisContext();
 	return m.default ? m.default(req, res) : m(req, res);
-}`, {
-		env: makeEnv(siteConfig),
-		eval: true,
-	});
+}`,
+		{
+			env: makeEnv(siteConfig),
+			eval: true,
+		}
+	);
 
 	const handler: MicriHandler = (req: IncomingMessage, res: ServerResponse) => {
 		return jsHandler(req, res, {
