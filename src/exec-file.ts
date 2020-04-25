@@ -116,7 +116,7 @@ async function getHandler(siteConfig: SiteConfig, file: File): Promise<MicriHand
 	const vm = require('vm');
 	const s = new vm.Script(opts.code, { filename: opts.filename, cachedData: opts.data });
 	const m = s.runInThisContext();
-	return m.default ? m.default(req, res) : m(req, res);
+	return m.render ? m.render(req, res) : m.default ? m.default(req, res) : m(req, res);
 }`,
 		{
 			env: makeEnv(siteConfig),
