@@ -1,6 +1,9 @@
 Functions
 =========
 
+Introduction
+------------
+
 The Functions feature allows Ship to, in addition to serving static assets, run
 specially crafted JavaScript functions (files) on the server-side. Specially
 crafted doesn't mean any black magic here, just that Functions can only load
@@ -59,5 +62,18 @@ globally as well as per site.
 
 See [examples](examples) for more usage examples.
 
+
+Configuration
+-------------
+
 Functions have some configuration parameters available in the `siteConfig` which
 are documented [here](config.md).
+
+
+What Doesn't Work
+-----------------
+
+Currently file system access is not possible at all, not to even temporary
+files. It's blocked by setting all the keys under `require('fs')` to null.
+In the future it could be an interesting feature to allow requiring `.js`
+files over an URL or read files under the site by fetching them.
