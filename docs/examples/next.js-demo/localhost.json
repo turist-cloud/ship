@@ -1,0 +1,15 @@
+{
+  "customErrors": {
+    "404": "/404.html"
+  },
+  "dirListing": false,
+  "routes": [
+    ["^/post/(?<pid>[^/]*)", "/post/$<pid>.html"]
+  ],
+  "hooks": {
+    "notFound": [["^/post/(?<pid>[^/]*).html$", "/post/[pid].js?pid=$<pid>"]]
+  },
+  "functions": true,
+  "functionsPattern": "\\.js$",
+  "functionsAutoExtension": ".js"
+}
