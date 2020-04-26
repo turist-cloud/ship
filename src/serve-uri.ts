@@ -67,6 +67,17 @@ export default async function serveUri(
 	pathname: string,
 	siteConfig: SiteConfig
 ): Promise<void> {
+	if (siteConfig.routes) {
+		const norm = normalizePath(pathname);
+		for (const route of siteConfig.routes) {
+			const out = norm.replace(route[0], route[1]);
+			if (out !== norm) {
+				pathname = out;
+				break;
+			}
+		}
+	}
+
 	const [normalizedPath, graphUrl, meta] = await getMeta(host, pathname);
 	if (graphUrl === null) {
 		sendError(

@@ -32,6 +32,12 @@ export type SiteConfig = {
 	 */
 	dirListing: boolean;
 	/**
+	 * Routes.
+	 * RegExp -> replace string
+	 * E.g. `["/users/(?<id>[^/]*)", "/users-api.js?id=$<id>"]`
+	 */
+	routes?: [[string, string]];
+	/**
 	 * Execute functions.
 	 */
 	functions: boolean;
@@ -85,6 +91,8 @@ const getDirList = promiseCache<Array<File | Folder>>(dirCache, async () => {
 	return res.value;
 });
 
+const initRoutes = (routes: [[string, string]]) => routes.map(([src, dst]) => [new RegExp(src), dst]);
+
 const getSiteConfig = promiseCache(
 	configCache,
 	async (host: string): Promise<SiteConfig> => {
@@ -104,6 +112,7 @@ const getSiteConfig = promiseCache(
 			functionsPattern: body.functionsPattern
 				? new RegExp(body.functionsPattern)
 				: defaultSiteConfig.functionsPattern,
+			routes: body.routes ? initRoutes(body.routes) : defaultSiteConfig.routes,
 		};
 	}
 );
