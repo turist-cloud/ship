@@ -1,10 +1,11 @@
 import LRU from 'lru-cache';
+import * as defaultConfig from './config';
 import apiFetch from './fetch-graph-api';
 import fetch from './fetch';
 import getEnv from './get-env';
 import promiseCache from './promise-cache';
 import { DirectoryListing, File, Folder } from './graph-api-types';
-import * as defaultConfig from './config';
+import { initRoutes, initHooks } from './routes';
 
 const [ROOT] = getEnv('ROOT');
 
@@ -34,9 +35,18 @@ export type SiteConfig = {
 	/**
 	 * Routes.
 	 * RegExp -> replace string
-	 * E.g. `["/users/(?<id>[^/]*)", "/users-api.js?id=$<id>"]`
+	 * E.g. `["^/users/(?<id>[^/]*)", "/users-api.js?id=$<id>"]`
 	 */
-	routes?: [[string, string]];
+	routes?: [RegExp, string][];
+	/**
+	 * Hooks.
+	 * The hook destination should be an exact match to a file as no further
+	 * processing will take place. This is to avoid an accidental infinite loop.
+	 * `notFound: [["^/users/(?<id>[^/]*).html$", "/users-api.js?id=$<id>"]]`
+	 */
+	hooks?: {
+		[index: string]: [RegExp, string][];
+	};
 	/**
 	 * Execute functions.
 	 */
@@ -91,8 +101,6 @@ const getDirList = promiseCache<Array<File | Folder>>(dirCache, async () => {
 	return res.value;
 });
 
-const initRoutes = (routes: [[string, string]]) => routes.map(([src, dst]) => [new RegExp(src), dst]);
-
 const getSiteConfig = promiseCache(
 	configCache,
 	async (host: string): Promise<SiteConfig> => {
@@ -113,6 +121,7 @@ const getSiteConfig = promiseCache(
 				? new RegExp(body.functionsPattern)
 				: defaultSiteConfig.functionsPattern,
 			routes: body.routes ? initRoutes(body.routes) : defaultSiteConfig.routes,
+			hooks: body.hooks ? initHooks(body.hooks) : defaultSiteConfig.hooks,
 		};
 	}
 );

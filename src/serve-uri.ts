@@ -1,4 +1,3 @@
-import { normalize as _pathNormalize } from 'path';
 import LRU from 'lru-cache';
 import { IncomingMessage, ServerResponse } from 'micri';
 import _apiFetch from './fetch-graph-api';
@@ -10,7 +9,8 @@ import sendFileList from './send-file-list';
 import { CACHE_SEC, HIDDEN_FILES, INDEX_PATTERN, PROTECTED_FILES } from './config';
 import { File, Folder } from './graph-api-types';
 import { SiteConfig } from './get-site-config';
-import { sendError, sendNotFoundError } from './error';
+import { normalizePath, findRoute } from './routes';
+import { sendNotFoundError, sendInvalidPathError } from './error';
 
 const [ROOT] = getEnv('ROOT');
 const metaCache = new LRU<string, any>({
@@ -19,17 +19,6 @@ const metaCache = new LRU<string, any>({
 });
 
 const apiFetch = promiseCache(metaCache, _apiFetch);
-
-function removeTrailing(str: string, ch: string): string {
-	return !str.endsWith(ch) ? str : removeTrailing(str.slice(0, -1), ch);
-}
-
-function normalizePath(path: string): string {
-	path = _pathNormalize(path);
-	path = removeTrailing(path, '/');
-
-	return path;
-}
 
 function buildUrl(host: string, path: string): string | null {
 	if (path.includes(':')) {
@@ -48,16 +37,15 @@ function shouldExec(siteConfig: SiteConfig, path: string): boolean {
 }
 
 async function getMeta(host: string, pathname: string) {
-	const normalizedPath = normalizePath(pathname);
-	const graphUrl = buildUrl(host, normalizedPath);
+	const graphUrl = buildUrl(host, pathname);
 
 	if (graphUrl === null) {
-		return [normalizedPath, null, null];
+		return [null, null];
 	}
 
 	const meta = await apiFetch(graphUrl);
 
-	return [normalizedPath, graphUrl, meta];
+	return [graphUrl, meta];
 }
 
 export default async function serveUri(
@@ -67,50 +55,53 @@ export default async function serveUri(
 	pathname: string,
 	siteConfig: SiteConfig
 ): Promise<void> {
+	// Handle routes
 	if (siteConfig.routes) {
-		const norm = normalizePath(pathname);
-		for (const route of siteConfig.routes) {
-			const out = norm.replace(route[0], route[1]);
-			if (out !== norm) {
-				pathname = out;
-				break;
-			}
-		}
+		const [newUrl, newPathname] = findRoute(req.url || '/', siteConfig.routes);
+		req.url = newUrl;
+		pathname = newPathname;
+	} else {
+		pathname = normalizePath(pathname);
 	}
 
-	const [normalizedPath, graphUrl, meta] = await getMeta(host, pathname);
+	const [graphUrl, meta] = await getMeta(host, pathname);
 	if (graphUrl === null) {
-		sendError(
-			req,
-			res,
-			400,
-			{
-				code: 'invalid_path',
-				message: 'Invalid path',
-			},
-			siteConfig
-		);
+		return sendInvalidPathError(req, res, siteConfig);
 	}
 
 	if (!meta) {
 		// AutoExtension handling in case nothing was found.
 		if (siteConfig.functions && !!siteConfig.functionsAutoExtension) {
-			const r = await getMeta(host, `${pathname}${siteConfig.functionsAutoExtension}`);
-			if (r[1] === null) {
-				sendError(
-					req,
-					res,
-					400,
-					{
-						code: 'invalid_path',
-						message: 'Invalid path',
-					},
-					siteConfig
-				);
+			const newPath = normalizePath(`${pathname}${siteConfig.functionsAutoExtension}`);
+			const [graphUrl, meta] = await getMeta(host, newPath);
+			if (graphUrl === null) {
+				return sendInvalidPathError(req, res, siteConfig);
 			}
 
-			if (r[2] && r[2].file && shouldExec(siteConfig, r[0])) {
-				return execFile(req, res, siteConfig, r[2]);
+			if (meta && meta.file && shouldExec(siteConfig, newPath)) {
+				return execFile(req, res, siteConfig, meta);
+			}
+		}
+
+		// notFound hook handling
+		if (siteConfig.hooks && siteConfig.hooks.notFound) {
+			const [newUrl, newPathname] = findRoute(req.url || '/', siteConfig.hooks.notFound);
+			if (newPathname !== pathname) {
+				req.url = newUrl;
+				pathname = newPathname;
+
+				const [graphUrl, meta] = await getMeta(host, pathname);
+				if (graphUrl === null) {
+					return sendInvalidPathError(req, res, siteConfig);
+				}
+
+				if (meta && meta.file) {
+					if (shouldExec(siteConfig, pathname)) {
+						return execFile(req, res, siteConfig, meta);
+					} else {
+						return sendFile(req, res, meta, siteConfig);
+					}
+				}
 			}
 		}
 
@@ -124,7 +115,7 @@ export default async function serveUri(
 				isIndexFile(o.name)
 		);
 		if (index) {
-			if (shouldExec(siteConfig, `${normalizedPath}/${index.name}`)) {
+			if (shouldExec(siteConfig, `${pathname}/${index.name}`)) {
 				return execFile(req, res, siteConfig, index);
 			}
 
@@ -136,13 +127,13 @@ export default async function serveUri(
 				return sendFileList(
 					req,
 					res,
-					normalizedPath,
+					pathname,
 					dir.filter((e: File | Folder) => HIDDEN_FILES.every((re) => !re.test(e.name.toLowerCase())))
 				);
 			}
 		}
 	} else if (meta.file) {
-		if (shouldExec(siteConfig, `${normalizedPath}/${meta.name}`)) {
+		if (shouldExec(siteConfig, `${pathname}/${meta.name}`)) {
 			return execFile(req, res, siteConfig, meta);
 		}
 

@@ -97,3 +97,16 @@ export function sendNotFoundError(req: IncomingMessage, res: ServerResponse, sit
 		siteConfig
 	);
 }
+
+export function sendInvalidPathError(req: IncomingMessage, res: ServerResponse, siteConfig?: SiteConfig) {
+	return sendError(
+		req,
+		res,
+		400,
+		{
+			code: 'invalid_path',
+			message: 'Invalid path',
+		},
+		siteConfig
+	);
+}
