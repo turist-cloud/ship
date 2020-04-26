@@ -122,14 +122,14 @@ export default async function serveUri(
 			return sendFile(req, res, index, siteConfig);
 		} else {
 			if (siteConfig.dirListing) {
-				return sendNotFoundError(req, res, siteConfig);
-			} else {
 				return sendFileList(
 					req,
 					res,
 					pathname,
 					dir.filter((e: File | Folder) => HIDDEN_FILES.every((re) => !re.test(e.name.toLowerCase())))
 				);
+			} else {
+				return sendNotFoundError(req, res, siteConfig);
 			}
 		}
 	} else if (meta.file) {
