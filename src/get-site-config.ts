@@ -35,14 +35,15 @@ export type SiteConfig = {
 	/**
 	 * Routes.
 	 * RegExp -> replace string
-	 * E.g. `["^/users/(?<id>[^/]*)", "/users-api.js?id=$<id>"]`
+	 * E.g. `["^/users/(?<id>[^/]*)", "/users-api.js"]`
+	 * E.g. `["^/users/(?<id>[^/]*)", "/users-$<id>.html"]`
 	 */
 	routes?: [RegExp, string][];
 	/**
 	 * Hooks.
 	 * The hook destination should be an exact match to a file as no further
 	 * processing will take place. This is to avoid an accidental infinite loop.
-	 * `notFound: [["^/users/(?<id>[^/]*)$", "/users-api.js?id=$<id>"]]`
+	 * `notFound: [["^/users/([^/]*)$", "/users-api.js"]]`
 	 */
 	hooks?: {
 		[index: string]: [RegExp, string][];

@@ -7,7 +7,7 @@
     ["^/post/(?<pid>[^/]*)", "/post/$<pid>.html"]
   ],
   "hooks": {
-    "notFound": [["^/post/(?<pid>[^/]*)$", "/post/[pid].js?pid=$<pid>"]]
+    "notFound": [["^/post/(?<pid>[^/]*)$", "/post/[pid].js"]]
   },
   "functions": true,
   "functionsPattern": "\\.js$",
