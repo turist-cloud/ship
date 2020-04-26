@@ -44,17 +44,7 @@ test('findRoute() finds a route', () => {
 	];
 
 	const out = findRoute('/pages/123', routes);
-	expect(out).toStrictEqual(['/pages.js?id=123', '/pages.js']);
-});
-
-test.skip('findRoute() finds a route and preserves existing query', () => {
-	const routes: [RegExp, string][] = [
-		[new RegExp('/users/(?<id>[^/]*)'), '/users.js?id=$<id>'],
-		[new RegExp('/pages/(?<id>[^/]*)'), '/pages.js?id=$<id>'],
-	];
-
-	const out = findRoute('/pages/123?xyz=abc', routes);
-	expect(out).toStrictEqual(['/pages.js?xyz=abc&id=123', '/pages.js']);
+	expect(out).toBe('/pages.js');
 });
 
 test('findRoute() returns the original path if nothing was found', () => {
@@ -64,5 +54,5 @@ test('findRoute() returns the original path if nothing was found', () => {
 	];
 
 	const out = findRoute('/page/123', routes);
-	expect(out).toStrictEqual(['/page/123', '/page/123']);
+	expect(out).toBe('/page/123');
 });

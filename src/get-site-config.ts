@@ -42,7 +42,7 @@ export type SiteConfig = {
 	 * Hooks.
 	 * The hook destination should be an exact match to a file as no further
 	 * processing will take place. This is to avoid an accidental infinite loop.
-	 * `notFound: [["^/users/(?<id>[^/]*).html$", "/users-api.js?id=$<id>"]]`
+	 * `notFound: [["^/users/(?<id>[^/]*)$", "/users-api.js?id=$<id>"]]`
 	 */
 	hooks?: {
 		[index: string]: [RegExp, string][];

@@ -12,7 +12,7 @@ export function normalizePath(path: string): string {
 	return path;
 }
 
-export function findRoute(url: string, routes: [RegExp, string][]): [string, string] {
+export function findRoute(url: string, routes: [RegExp, string][]): string {
 	let path = normalizePath(parse(url || '/', true).pathname || '');
 
 	for (const route of routes) {
@@ -25,7 +25,7 @@ export function findRoute(url: string, routes: [RegExp, string][]): [string, str
 
 	const newPathname = normalizePath(parse(path || '/').pathname || '');
 
-	return [path, newPathname];
+	return newPathname;
 }
 
 export function initRoutes(routes: [string, string][]): [RegExp, string][] {

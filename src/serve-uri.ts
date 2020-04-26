@@ -57,8 +57,7 @@ export default async function serveUri(
 ): Promise<void> {
 	// Handle routes
 	if (siteConfig.routes) {
-		const [newUrl, newPathname] = findRoute(req.url || '/', siteConfig.routes);
-		req.url = newUrl;
+		const newPathname = findRoute(req.url || '/', siteConfig.routes);
 		pathname = newPathname;
 	} else {
 		pathname = normalizePath(pathname);
@@ -85,9 +84,8 @@ export default async function serveUri(
 
 		// notFound hook handling
 		if (siteConfig.hooks && siteConfig.hooks.notFound) {
-			const [newUrl, newPathname] = findRoute(req.url || '/', siteConfig.hooks.notFound);
+			const newPathname = findRoute(req.url || '/', siteConfig.hooks.notFound);
 			if (newPathname !== pathname) {
-				req.url = newUrl;
 				pathname = newPathname;
 
 				const [graphUrl, meta] = await getMeta(host, pathname);
