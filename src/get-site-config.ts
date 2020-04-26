@@ -42,6 +42,19 @@ export type SiteConfig = {
 		[index: string]: string;
 	};
 	functionsPattern: RegExp;
+	/**
+	 * Apply an automatic extension to paths that could match with a function.
+	 *
+	 * If defined an extension is added on paths not otherwise matching to the
+	 * functions pattern.
+	 *
+	 * E.g. If the extension is `.js` and a request path would be `/api/func`
+	 * then `/api/func.js` would be a match.
+	 *
+	 * **WARNING**: Using this option migt lead to very confusing results if
+	 * both names exist.
+	 */
+	functionsAutoExtension?: string;
 };
 
 const defaultSiteConfig: SiteConfig = {
@@ -88,6 +101,9 @@ const getSiteConfig = promiseCache(
 		return {
 			...defaultSiteConfig,
 			...body,
+			functionsPattern: body.functionsPattern
+				? new RegExp(body.functionsPattern)
+				: defaultSiteConfig.functionsPattern,
 		};
 	}
 );

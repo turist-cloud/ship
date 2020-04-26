@@ -47,6 +47,19 @@ function shouldExec(siteConfig: SiteConfig, path: string): boolean {
 	return !!siteConfig.functions && siteConfig.functionsPattern.test(path);
 }
 
+async function getMeta(host: string, pathname: string) {
+	const normalizedPath = normalizePath(pathname);
+	const graphUrl = buildUrl(host, normalizedPath);
+
+	if (graphUrl === null) {
+		return [normalizedPath, null, null];
+	}
+
+	const meta = await apiFetch(graphUrl);
+
+	return [normalizedPath, graphUrl, meta];
+}
+
 export default async function serveUri(
 	req: IncomingMessage,
 	res: ServerResponse,
@@ -54,8 +67,7 @@ export default async function serveUri(
 	pathname: string,
 	siteConfig: SiteConfig
 ): Promise<void> {
-	const normalizedPath = normalizePath(pathname);
-	const graphUrl = buildUrl(host, normalizedPath);
+	const [normalizedPath, graphUrl, meta] = await getMeta(host, pathname);
 	if (graphUrl === null) {
 		sendError(
 			req,
@@ -69,9 +81,28 @@ export default async function serveUri(
 		);
 	}
 
-	const meta = await apiFetch(graphUrl);
-
 	if (!meta) {
+		// AutoExtension handling in case nothing was found.
+		if (siteConfig.functions && !!siteConfig.functionsAutoExtension) {
+			const r = await getMeta(host, `${pathname}${siteConfig.functionsAutoExtension}`);
+			if (r[1] === null) {
+				sendError(
+					req,
+					res,
+					400,
+					{
+						code: 'invalid_path',
+						message: 'Invalid path',
+					},
+					siteConfig
+				);
+			}
+
+			if (r[2] && r[2].file && shouldExec(siteConfig, r[0])) {
+				return execFile(req, res, siteConfig, r[2]);
+			}
+		}
+
 		return sendNotFoundError(req, res, siteConfig);
 	} else if (meta.folder) {
 		const { value: dir } = await apiFetch(`${graphUrl}/children`);

@@ -1,5 +1,5 @@
 import { parse } from 'url';
-import accesslog from 'access-log';
+import accessLog from 'access-log';
 import micri from 'micri';
 import { IncomingMessage, ServerResponse } from 'micri';
 import apiFetch from './fetch-graph-api';
@@ -12,7 +12,7 @@ const [ROOT] = getEnv('ROOT');
 const HOSTNAME_RE = /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/;
 
 const server = micri(async (req: IncomingMessage, res: ServerResponse) => {
-	accesslog(req, res);
+	accessLog(req, res);
 
 	const pathname = parse(req.url || '/', true).pathname || '';
 	const host = req.headers.host?.split(':')[0] || '';
