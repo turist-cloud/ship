@@ -7,6 +7,7 @@ Ship websites like it's the 90's again! FTP FTW
 - No build steps
 - No previews
 - Just File Transfer Protocols!
+- Partial [Next.js](https://nextjs.org/) serverless target compatibility
 
 **Documentation**
 
