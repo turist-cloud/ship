@@ -117,7 +117,7 @@ export default async function uploadFiles(adal: Adal, spoRoot: string): Promise<
 				const { size: fileSize } = await file.stat();
 
 				console.error(`Uploading ${pathname}`);
-				await uploadFile(adal, spoRoot, pathname, fs.createReadStream('', { fd: file.fd }), fileSize);
+				await uploadFile(adal, spoRoot, pathname, fs.createReadStream('', { fd: file.fd, autoClose: false }), fileSize);
 
 				file.close();
 				s.release();
