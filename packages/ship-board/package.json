@@ -1,0 +1,53 @@
+{
+  "name": "@turist/ship-board",
+  "version": "0.1.0",
+  "description": "Board a project to Ship.",
+  "repository": "turist-cloud/ship",
+  "author": "Olli Vanhoja <olli.vanhoja@gmail.com>",
+  "license": "MIT",
+  "bin": {
+    "ship-board": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "ncc build src/index.ts -s -o dist",
+    "lint": "eslint --ext .ts ./src",
+    "prepublish": "npm run build",
+    "prettier": "prettier --write './{src,__test__}/**/*.ts'",
+    "test": "NODE_ENV=test jest"
+  },
+  "engines": {
+    "node": ">= 12.0.0"
+  },
+  "dependencies": {
+    "@turist/fetch": "7.1.5",
+    "adal-node": "0.2.1",
+    "ajv": "6.12.2",
+    "async-sema": "3.1.0",
+    "glob": "7.1.6",
+    "ignore": "5.1.4",
+    "node-fetch": "2.6.0"
+  },
+  "devDependencies": {
+    "@types/glob": "7.1.1",
+    "@types/jest": "25.2.1",
+    "@types/node": "13.13.4",
+    "@types/node-fetch": "2",
+    "@zeit/ncc": "0.22.1",
+    "eslint": "6.8.0",
+    "jest": "25.4.0",
+    "prettier": "2.0.5",
+    "ts-jest": "25.4.0",
+    "typescript": "3.8.3"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "src/*.ts"
+    ],
+    "verbose": true
+  }
+}
