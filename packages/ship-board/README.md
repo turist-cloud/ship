@@ -60,12 +60,25 @@ First you need to decide how you want to feed to configuration to
 If you are using node.js/npm/yarn for your project you might want to consider
 installing `ship-board` as a dev dependency.
 
-
 Once configured, uploading a project is fairly easy. In fact, there is only one
 step (assuming yarn):
 
 ```
 $ yarn ship-board
+```
+
+If you instead decide to install `ship-board` globally with `npm` then you can
+run:
+
+```
+ship-board
+```
+
+Oh, and the command also accepts an argument, that's the directory to be
+uploaded:
+
+```
+ship-board ./path/to/my/cool/website
 ```
 
 
