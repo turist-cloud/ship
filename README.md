@@ -9,19 +9,29 @@ Ship websites like it's the 90's again! FTP FTW
 - Just File Transfer Protocols!
 - Partial [Next.js](https://nextjs.org/) serverless target compatibility
 
-**Documentation**
+Documentation
+-------------
 
 - [Deploying](/docs/deploying.md)
 - [Configuration](/docs/config.md)
 - [Functions](/docs/functions.md)
 
 
-**Ship It**
+Ship It
+-------
 
-Upload files:
+You can either upload files manually to SharePoint Online or use
+[ship-board](/packages/ship-board).
+
+**Uploading files manually**
 
 ![Ship](/docs/ship.gif)
 
+**Using ship-board**
+
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=bTkfUmCDJg0" target="_blank">
+<img src="http://img.youtube.com/vi/bTkfUmCDJg0/0.jpg" alt="ship-board video" width="240" height="180" border="10" />
+</a>
 
 And that's it, you have already shipped a new website  🎉
 
