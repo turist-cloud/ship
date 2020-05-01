@@ -48,6 +48,34 @@ async function getMeta(host: string, pathname: string) {
 	return [graphUrl, meta];
 }
 
+async function getMetaAuto(siteConfig: SiteConfig, host: string, pathname: string) {
+	const orig = await getMeta(host, pathname);
+	if (orig[0] === null) {
+		return orig;
+	}
+
+	// AutoExtension handling in case nothing was found.
+	if (!!siteConfig.autoExtension) {
+		const newPath = normalizePath(`${pathname}${siteConfig.autoExtension}`);
+		const autoExt = await getMeta(host, newPath);
+		if (autoExt[1]) {
+			return autoExt;
+		}
+	}
+
+	if (siteConfig.functions && !!siteConfig.functionsAutoExtension) {
+		const newPath = normalizePath(`${pathname}${siteConfig.functionsAutoExtension}`);
+		const autoExt = await getMeta(host, newPath);
+		const meta = autoExt[1];
+
+		if (meta && meta.file && shouldExec(siteConfig, newPath)) {
+			return autoExt;
+		}
+	}
+
+	return orig;
+}
+
 export default async function serveUri(
 	req: IncomingMessage,
 	res: ServerResponse,
@@ -63,25 +91,12 @@ export default async function serveUri(
 		pathname = normalizePath(pathname);
 	}
 
-	const [graphUrl, meta] = await getMeta(host, pathname);
+	const [graphUrl, meta] = await getMetaAuto(siteConfig, host, pathname);
 	if (graphUrl === null) {
 		return sendInvalidPathError(req, res, siteConfig);
 	}
 
 	if (!meta) {
-		// AutoExtension handling in case nothing was found.
-		if (siteConfig.functions && !!siteConfig.functionsAutoExtension) {
-			const newPath = normalizePath(`${pathname}${siteConfig.functionsAutoExtension}`);
-			const [graphUrl, meta] = await getMeta(host, newPath);
-			if (graphUrl === null) {
-				return sendInvalidPathError(req, res, siteConfig);
-			}
-
-			if (meta && meta.file && shouldExec(siteConfig, newPath)) {
-				return execFile(req, res, siteConfig, meta);
-			}
-		}
-
 		// notFound hook handling
 		if (siteConfig.hooks && siteConfig.hooks.notFound) {
 			const newPathname = findRoute(req.url || '/', siteConfig.hooks.notFound);

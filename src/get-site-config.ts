@@ -49,6 +49,11 @@ export type SiteConfig = {
 		[index: string]: [RegExp, string][];
 	};
 	/**
+	 * Apply an automatic extension to paths that could match with a static
+	 * file or a function.
+	 */
+	autoExtension?: string;
+	/**
 	 * Execute functions.
 	 */
 	functions: boolean;
@@ -68,7 +73,7 @@ export type SiteConfig = {
 	 * E.g. If the extension is `.js` and a request path would be `/api/func`
 	 * then `/api/func.js` would be a match.
 	 *
-	 * **WARNING**: Using this option migt lead to very confusing results if
+	 * **WARNING**: Using this option might lead to very confusing results if
 	 * both names exist.
 	 */
 	functionsAutoExtension?: string;
