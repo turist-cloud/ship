@@ -11,6 +11,7 @@ async function run() {
 	const adal = new Adal(config.authorityHostUrl, config.tenant, config.clientId);
 
 	const deploymentPath = process.argv[2] || process.cwd();
+	process.chdir(deploymentPath);
 
 	console.error(`Boarding "${deploymentPath}" to "${config.domain}"`);
 
