@@ -96,7 +96,7 @@ However, we are lucky and Microsoft is working on this:
 https://microsoftgraph.uservoice.com/forums/920506-microsoft-graph-feature-requests/suggestions/37796059-restrict-permissions-to-app-only-azure-ad-applicat?page=1&per_page=20
 
 Once that is implemented then alternative authentication methods will be
-implemented into `shiip-board`.
+implemented into `ship-board`.
 
 **How to run this in a CI or GitHub action?**
 
