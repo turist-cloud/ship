@@ -9,7 +9,8 @@
   "hooks": {
     "notFound": [["^/post/(?<pid>[^/]*)$", "/post/[pid].js"]]
   },
+  "autoExtension": ".html",
   "functions": true,
-  "functionsPattern": "\\.js$",
+  "functionsPattern": "^(?!\/_next\/.*).*\\.js$",
   "functionsAutoExtension": ".js"
 }
