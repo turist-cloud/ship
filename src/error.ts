@@ -60,7 +60,7 @@ export async function sendError(
 		const customPage = customErrors && customErrors[statusCode];
 		if (customPage) {
 			const host = req.headers.host?.split(':')[0] || '';
-			return serveUri(req, res, host, customPage, safeSiteConfig);
+			return serveUri(req, res, { host, pathname: customPage, siteConfig: safeSiteConfig });
 		}
 
 		return send(
@@ -106,6 +106,22 @@ export function sendInvalidPathError(req: IncomingMessage, res: ServerResponse, 
 		{
 			code: 'invalid_path',
 			message: 'Invalid path',
+		},
+		siteConfig
+	);
+}
+
+export function sendAuthSystemError(req: IncomingMessage, res: ServerResponse, siteConfig?: SiteConfig) {
+	// eslint-disable-next-line no-console
+	console.error(new Error('Auth system error'));
+
+	return sendError(
+		req,
+		res,
+		500,
+		{
+			code: 'auth_system_error',
+			message: 'Internal Server Error',
 		},
 		siteConfig
 	);

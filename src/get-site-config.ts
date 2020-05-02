@@ -33,6 +33,16 @@ export type SiteConfig = {
 	 */
 	dirListing: boolean;
 	/**
+	 * AAD Authentication.
+	 */
+	useAAD?: boolean;
+	/**
+	 * USE_AAD redirect URI.
+	 * E.g. `https://domain.com
+	 * Must be set if `useAAD` is set.
+	 */
+	useAADRedirectUri?: string;
+	/**
 	 * Routes.
 	 * RegExp -> replace string
 	 * E.g. `["^/users/(?<id>[^/]*)", "/users-api.js"]`

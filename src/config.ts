@@ -6,3 +6,5 @@ export const HIDDEN_FILES = [/^\./, ...PROTECTED_FILES];
 export const INDEX_PATTERN = /^index\..*/i;
 export const ENABLE_FUNCTIONS = false;
 export const FUNCTIONS_PATTERN = /^\/api\/.*\.js$/;
+export const USE_SECURE_COOKIES = process.env.NODE_ENV === 'production';
+export const USE_AAD_AUTH_COOKIE_NAME = 'aad_access_token';

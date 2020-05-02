@@ -8,6 +8,7 @@ import sendFile from './send-file';
 import sendFileList from './send-file-list';
 import { CACHE_SEC, HIDDEN_FILES, INDEX_PATTERN, PROTECTED_FILES } from './config';
 import { File, Folder } from './graph-api-types';
+import { ParsedRequestOpts } from './types';
 import { SiteConfig } from './get-site-config';
 import { normalizePath, findRoute } from './routes';
 import { sendNotFoundError, sendInvalidPathError } from './error';
@@ -79,9 +80,7 @@ async function getMetaAuto(siteConfig: SiteConfig, host: string, pathname: strin
 export default async function serveUri(
 	req: IncomingMessage,
 	res: ServerResponse,
-	host: string,
-	pathname: string,
-	siteConfig: SiteConfig
+	{ host, pathname, siteConfig }: ParsedRequestOpts
 ): Promise<void> {
 	// Handle routes
 	if (siteConfig.routes) {

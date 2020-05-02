@@ -3,11 +3,13 @@ Turist Ship
 
 Ship websites like it's the 90's again! FTP FTW
 
-- No enforced version control integration
-- No build steps
-- No previews
+- NO
+  - enforced version control integration
+  - build steps
+  - previews
 - Just File Transfer Protocols!
-- Partial [Next.js](https://nextjs.org/) serverless target compatibility
+- Compatible with [Next.js](https://nextjs.org/) serverless target [READ MORE](/docs/examples/next.js-demo)
+- Optional Azure AD authentication for websites [READ MORE](/docs/use-add.md)
 
 Documentation
 -------------
@@ -15,6 +17,7 @@ Documentation
 - [Deploying](/docs/deploying.md)
 - [Configuration](/docs/config.md)
 - [Functions](/docs/functions.md)
+- [Azure AD Authentication](/docs/use-add.md)
 
 
 Ship It
