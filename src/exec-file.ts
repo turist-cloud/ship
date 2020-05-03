@@ -2,18 +2,22 @@ import vm from 'vm';
 import ms from 'ms';
 import createDebug from 'debug';
 import { IncomingMessage, ServerResponse, MicriHandler, withWorker } from 'micri';
+import ExecQueue from './exec-queue';
 import SWR, { SWRError } from './swr';
 import fetch from './fetch';
 import fetchAPI from './fetch-graph-api';
 import promiseCache from './promise-cache';
+import { FUNCTIONS_MAX_CONCURRENT, FUNCTIONS_MAX_WAIT, FUNCTIONS_MAX_QUEUE } from './config';
 import { File } from './graph-api-types';
 import { SiteConfig } from './get-site-config';
+import { sendError } from './error';
 
 const MAX_AGE = ms('15m');
 const REVALIDATE_AFTER = ms('30s');
 
 const debug = createDebug('exec-file');
 const parseIdFromCacheKey = (key: string) => JSON.parse(key)[1];
+const execQueue = new ExecQueue(FUNCTIONS_MAX_CONCURRENT, FUNCTIONS_MAX_QUEUE, FUNCTIONS_MAX_WAIT);
 
 const handlerMetaCache = new WeakMap<MicriHandler, { siteConfig: SiteConfig; driveId: string; etag: string }>();
 const handlerCache = new SWR<Promise<MicriHandler>>({
@@ -150,7 +154,17 @@ export default async function execFile(req: IncomingMessage, res: ServerResponse
 	const getHandlerCached = promiseCache<MicriHandler>(handlerCache, async (siteConfig: SiteConfig, _id: string) =>
 		getHandler(siteConfig, file)
 	);
-	const handler = await getHandlerCached(siteConfig, file.id);
+	const [slot, handler] = await Promise.all([execQueue.getExecSlot(), getHandlerCached(siteConfig, file.id)]);
 
-	return handler(req, res, null);
+	if (!slot) {
+		return sendError(req, res, 503, {
+			code: 'service_unavailable',
+			message: 'The Functions service is busy',
+		});
+	}
+
+	const p = handler(req, res, null);
+	p.finally(() => execQueue.releaseExecSlot());
+
+	return p;
 }

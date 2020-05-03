@@ -908,6 +908,11 @@ async-retry-ng@2.0.0:
   resolved "https://registry.yarnpkg.com/async-retry-ng/-/async-retry-ng-2.0.0.tgz#2a1b71f45b1339cc4a24da7150fa58e9a0c405ad"
   integrity sha512-meSKrvYhWBHs12+8OSPl3wjBoAxYY1eOGkdLvudMZwXEsI2ZpoBNQAvKrHoAoW4Pgoa8+T6TftLippj1S7GP1Q==
 
+async-sema@3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/async-sema/-/async-sema-3.1.0.tgz#3a813beb261e4cc58b19213916a48e931e21d21e"
+  integrity sha512-+JpRq3r0zjpRLDruS6q/nC4V5tzsaiu07521677Mdi5i+AkaU/aNJH38rYHJVQ4zvz+SSkjgc8FUI7qIZrR+3g==
+
 async@^2.6.3:
   version "2.6.3"
   resolved "https://registry.yarnpkg.com/async/-/async-2.6.3.tgz#d72625e2344a3656e3a3ad4fa749fa83299d82ff"
