@@ -21,7 +21,7 @@
     "debug": "4.1.1",
     "jsonwebtoken": "8.5.1",
     "lru-cache": "5.1.1",
-    "micri": "4.1.1",
+    "micri": "4.2.0",
     "ms": "2.1.2",
     "node-fetch": "2.6.0"
   },
