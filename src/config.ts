@@ -1,7 +1,9 @@
 import ms from 'ms';
 
 export const CACHE_SEC = 30;
-export const CACHE_CONTROL = `public, max-age=${CACHE_SEC / 2}, stale-while-revalidate=${CACHE_SEC / 2}, s-maxage=${CACHE_SEC / 2}, no-transform`;
+export const CACHE_CONTROL = `public, max-age=${CACHE_SEC / 2}, stale-while-revalidate=${CACHE_SEC / 2}, s-maxage=${
+	CACHE_SEC / 2
+}, no-transform`;
 
 export const ENABLE_DIR_LISTING = false;
 export const PROTECTED_FILES = [/\.swp$/];
