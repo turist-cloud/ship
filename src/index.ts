@@ -24,8 +24,8 @@ const accessLog = (hndl: MicriHandler) => (req: IncomingMessage, res: ServerResp
 
 // Select HTTP/1.1 or HTTP/2 specific functions.
 const {
-	getHost,	// Get site host
-	serve,		// Create a HTTP server and use micri to serve the requests
+	getHost, // Get site host
+	serve, // Create a HTTP server and use micri to serve the requests
 }: {
 	getHost: (req: IncomingMessage) => string;
 	serve: (fn: MicriHandler<ShipOpts>) => Http1Server | Http2Server;
@@ -45,10 +45,12 @@ const {
 				return host.split(':')[0];
 			},
 			serve: (fn: MicriHandler<ShipOpts>): Http2Server =>
+				// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 				// @ts-ignore Currently Micri isn't exactly aware of HTTP/2
 				createHttp2Server((req, res) => run<OptsType>(req, res, fn)),
 		};
 	} else {
+		// eslint-disable-next-line no-console
 		console.error(`Unsupported HTTP version: "${HTTP_VERSION}"`);
 		process.exit(1);
 	}
