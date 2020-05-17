@@ -1,9 +1,17 @@
 import ms from 'ms';
 
+/**
+ * Cache TTL.
+ * Used for some internal caches.
+ */
 export const CACHE_SEC = 30;
-export const CACHE_CONTROL = `public, max-age=${CACHE_SEC / 2}, stale-while-revalidate=${CACHE_SEC / 2}, s-maxage=${
-	CACHE_SEC / 2
-}, no-transform`;
+
+const CACHE_CONTROL_TTL = 15;
+
+/**
+ * Cache-Control header sent for public responses.
+ */
+export const CACHE_CONTROL = `public, max-age=${CACHE_CONTROL_TTL}, stale-while-revalidate=${CACHE_CONTROL_TTL}, s-maxage=${CACHE_CONTROL_TTL}, no-transform`;
 
 export const ENABLE_DIR_LISTING = false;
 export const PROTECTED_FILES = [/\.swp$/];
