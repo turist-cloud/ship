@@ -2,25 +2,20 @@ import { parse } from 'url';
 import { Server as Http1Server, createServer as createHttp1Server } from 'http';
 import { Http2Server, createServer as createHttp2Server, constants as http2Constants } from 'http2';
 import _accessLog from 'access-log';
-import { run, MicriHandler } from 'micri';
-import { IncomingMessage, ServerResponse } from 'micri';
+import { IncomingMessage, ServerResponse, run, MicriHandler } from 'micri';
 import apiFetch from './fetch-graph-api';
 import getEnv from './get-env';
 import getSiteConfig from './get-site-config';
 import serveUri from './serve-uri';
-import { sendError } from './error';
 import useAAD from './use-aad';
+import { ParsedRequestOpts } from './types';
+import { sendError } from './error';
 
 type ShipOpts = ReturnType<typeof parseRequest>;
 
 const [ROOT] = getEnv('ROOT');
 const HOSTNAME_RE = /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/;
 const HTTP_VERSION = process.env.HTTP_VERSION || '1.1';
-
-const accessLog = (hndl: MicriHandler) => (req: IncomingMessage, res: ServerResponse) => {
-	_accessLog(req, res);
-	return hndl(req, res);
-};
 
 // Select HTTP/1.1 or HTTP/2 specific functions.
 const {
@@ -56,27 +51,38 @@ const {
 	}
 })();
 
-const parseRequest = (hndl: MicriHandler) => async (req: IncomingMessage, res: ServerResponse) => {
-	const pathname = parse(req.url || '/', true).pathname || '';
-	const host = getHost(req);
+const parseRequest = (hndl: MicriHandler) => {
+	const serveUsingAAD = useAAD(hndl);
 
-	if (host === '' || !HOSTNAME_RE.test(host)) {
-		return sendError(req, res, 400, {
-			code: 'invalid_host',
-			message: 'Invalid Host',
-		});
-	}
+	return async (req: IncomingMessage, res: ServerResponse) => {
+		_accessLog(req, res);
+		res.setHeader('Server', 'Ship');
 
-	const siteConfig = await getSiteConfig(host);
+		const pathname = parse(req.url || '/', true).pathname || '';
+		const host = getHost(req);
 
-	return hndl(req, res, {
-		host,
-		pathname,
-		siteConfig,
-	});
+		if (host === '' || !HOSTNAME_RE.test(host)) {
+			return sendError(req, res, 400, {
+				code: 'invalid_host',
+				message: 'Invalid Host',
+			});
+		}
+
+		const siteConfig = await getSiteConfig(host);
+		const opts: ParsedRequestOpts = {
+			host,
+			pathname,
+			siteConfig,
+		};
+
+		if (!!opts.siteConfig.useAAD) {
+			return serveUsingAAD(req, res, opts);
+		}
+		return hndl(req, res, opts);
+	};
 };
 
-const server = serve(accessLog(parseRequest(useAAD(serveUri))));
+const server = serve(parseRequest(serveUri));
 
 server.listen(process.env.PORT || 3000);
 

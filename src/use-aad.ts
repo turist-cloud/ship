@@ -87,29 +87,22 @@ const parsePath = (hndl: MicriHandler): MicriHandler => (req: IncomingMessage, r
 };
 
 export default (hndl: MicriHandler): MicriHandler =>
-	router<ParsedRequestOpts>(
-		on.get(
-			(_req: any, _res: any, opts: ParsedRequestOpts) => !!opts.siteConfig.useAAD,
-			parsePath(
-				authReq(
-					router<ParsedRequestOpts & AuthOpts>(
-						on.get(
-							(_req: IncomingMessage, _res: ServerResponse, opts: AuthOpts) => opts.pathname === '/auth',
-							auth
-						),
-						on.get(
-							(_req: IncomingMessage, _res: ServerResponse, opts: AuthOpts) => opts.pathname === '/token',
-							getAToken
-						),
-						on.get(
-							(_req: IncomingMessage, _res: ServerResponse, opts: AuthOpts) =>
-								opts.pathname === '/logout',
-							logout
-						),
-						otherwise(hndl)
-					)
-				)
+	parsePath(
+		authReq(
+			router<ParsedRequestOpts & AuthOpts>(
+				on.get(
+					(_req: IncomingMessage, _res: ServerResponse, opts: AuthOpts) => opts.pathname === '/auth',
+					auth
+				),
+				on.get(
+					(_req: IncomingMessage, _res: ServerResponse, opts: AuthOpts) => opts.pathname === '/token',
+					getAToken
+				),
+				on.get(
+					(_req: IncomingMessage, _res: ServerResponse, opts: AuthOpts) => opts.pathname === '/logout',
+					logout
+				),
+				otherwise(hndl)
 			)
-		),
-		otherwise(hndl)
+		)
 	);
