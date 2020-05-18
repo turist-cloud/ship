@@ -4,7 +4,7 @@ import { IncomingMessage, ServerResponse, send } from 'micri';
 import allowedMethod from './allowed-method';
 import fetch from './fetch';
 import setVary from './set-vary';
-import { CACHE_CONTROL } from './config';
+import { CACHE_CONTROL_PUBLIC, CACHE_CONTROL_PRIVATE } from './config';
 import { File } from './graph-api-types';
 import { SiteConfig } from './get-site-config';
 import { sendNotFoundError, sendError } from './error';
@@ -123,7 +123,7 @@ export default async function sendFile(
 	}
 
 	setVary(res);
-	res.setHeader('Cache-Control', CACHE_CONTROL);
+	res.setHeader('Cache-Control', siteConfig.useAAD ? CACHE_CONTROL_PRIVATE : CACHE_CONTROL_PUBLIC);
 	res.setHeader('ETag', etag);
 
 	if (etagMatch) {

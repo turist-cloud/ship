@@ -9,7 +9,7 @@ configuration needs to be a bit different, and you also may want to have a
 better control on what the users can do and who is allowed to use the App.
 See Microsoft's [Node.js example](https://github.com/microsoftgraph/nodejs-security-sample/)
 for how to setup a new application  in Microsoft Azure AD. In brief it needs to
-be a Web API application with at least a *Redirect URI* to `/auth`$, an
+be a Web API application with at least a *Redirect URI* to `/auth`, an
 *API Permission* to do `User.read`, and finally you'll need an API secret.
 
 | Environment variable	    | Description                       |
@@ -25,7 +25,7 @@ config in the site `json` config file.
 ```json
 {
   "useAAD": true,
-  "useAADRedirectUri": "http://yourdomain.com"
+  "useAADRedirectUri": "http://yourdomain.com/token"
 }
 ```
 

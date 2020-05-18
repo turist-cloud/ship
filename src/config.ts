@@ -11,7 +11,8 @@ const CACHE_CONTROL_TTL = 15;
 /**
  * Cache-Control header sent for public responses.
  */
-export const CACHE_CONTROL = `public, max-age=${CACHE_CONTROL_TTL}, stale-while-revalidate=${CACHE_CONTROL_TTL}, s-maxage=${CACHE_CONTROL_TTL}, no-transform`;
+export const CACHE_CONTROL_PUBLIC = `public, max-age=${CACHE_CONTROL_TTL}, stale-while-revalidate=${CACHE_CONTROL_TTL}, s-maxage=${CACHE_CONTROL_TTL}, no-transform`;
+export const CACHE_CONTROL_PRIVATE = `private, max-age=${CACHE_CONTROL_TTL}, stale-while-revalidate=${CACHE_CONTROL_TTL}, no-transform`;
 
 export const ENABLE_DIR_LISTING = false;
 export const PROTECTED_FILES = [/\.swp$/];
