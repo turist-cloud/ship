@@ -2,18 +2,16 @@ import LRU from 'lru-cache';
 import { IncomingMessage, ServerResponse } from 'micri';
 import _apiFetch from './fetch-graph-api';
 import execFile from './exec-file';
-import getEnv from './get-env';
 import promiseCache from './cache/promise-cache';
 import sendFile from './send-file';
 import sendFileList from './send-file-list';
-import { CACHE_SEC, HIDDEN_FILES, INDEX_PATTERN, PROTECTED_FILES } from './config';
+import { ROOT, CACHE_SEC, HIDDEN_FILES, INDEX_PATTERN, PROTECTED_FILES } from './config';
 import { File, Folder } from './graph-api-types';
 import { ParsedRequestOpts } from './types';
 import { SiteConfig } from './get-site-config';
 import { normalizePath, findRoute } from './routes';
 import { sendNotFoundError, sendInvalidPathError } from './error';
 
-const [ROOT] = getEnv('ROOT');
 const metaCache = new LRU<string, any>({
 	max: 100,
 	maxAge: CACHE_SEC * 1000,

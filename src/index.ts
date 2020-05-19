@@ -2,9 +2,9 @@ import { parse } from 'url';
 import { Server as Http1Server, createServer as createHttp1Server } from 'http';
 import { Http2Server, createServer as createHttp2Server, constants as http2Constants } from 'http2';
 import _accessLog from 'access-log';
-import { IncomingMessage, ServerResponse, run, MicriHandler } from 'micri';
+import { IncomingMessage, ServerResponse, MicriHandler, run } from 'micri';
 import apiFetch from './fetch-graph-api';
-import getEnv from './get-env';
+import { HTTP_VERSION, PORT, PORT_HTTP, ROOT } from './config';
 import getSiteConfig from './get-site-config';
 import serveUri from './serve-uri';
 import useAAD from './aad/use-aad';
@@ -13,9 +13,7 @@ import { sendError } from './error';
 
 type ShipOpts = ReturnType<typeof parseRequest>;
 
-const [ROOT] = getEnv('ROOT');
 const HOSTNAME_RE = /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/;
-const HTTP_VERSION = process.env.HTTP_VERSION || '1.1';
 
 // Select HTTP/1.1 or HTTP/2 specific functions.
 const {
@@ -82,9 +80,26 @@ const parseRequest = (hndl: MicriHandler) => {
 	};
 };
 
-const server = serve(parseRequest(serveUri));
+const servers = [serve(parseRequest(serveUri))];
 
-server.listen(process.env.PORT || 3000);
+// If PORT_HTTP is set it means that we are in standalone HTTPS mode and we need
+// to provide a server on port 80 for redirects to HTTPS.
+if (PORT_HTTP) {
+	const server = serve((req: IncomingMessage, res: ServerResponse) => {
+		const host = req.headers.host?.split(':')[0] || '';
+		const dest = `https://${host}${PORT !== 443 ? `:${PORT}` : ''}${req.url}`;
+
+		res.statusCode = 308;
+		res.setHeader('Location', dest);
+		res.setHeader('Refresh', `0;url=${dest}`);
+		res.end();
+	});
+
+	server.listen(PORT_HTTP);
+	servers.push(server);
+}
+
+servers[0].listen(PORT);
 
 // Start authentication on startup to minimize the effect to serving traffic.
 apiFetch(`${ROOT}:`)
@@ -93,3 +108,20 @@ apiFetch(`${ROOT}:`)
 		console.error(err); // eslint-disable-line no-console
 		process.exit(1);
 	});
+
+function shutdown() {
+	console.error('Shutting down');
+	Promise.all(servers.map((server) => new Promise((resolve) => server.close(resolve))))
+		.then(() => {
+			console.error('Shutdown complete');
+			process.exit(1);
+		})
+		.catch((err) => {
+			console.error('Graceful shutdown failed');
+			console.error(err);
+			process.exit(1);
+		});
+}
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);

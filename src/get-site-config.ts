@@ -2,12 +2,11 @@ import LRU from 'lru-cache';
 import * as defaultConfig from './config';
 import apiFetch from './fetch-graph-api';
 import fetch from './fetch';
-import getEnv from './get-env';
 import promiseCache from './cache/promise-cache';
 import { DirectoryListing, File, Folder } from './graph-api-types';
 import { initRoutes, initHooks } from './routes';
 
-const [ROOT] = getEnv('ROOT');
+const ROOT = defaultConfig.ROOT;
 
 /**
  * SiteConfig can be set per each domain.

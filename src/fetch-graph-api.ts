@@ -2,7 +2,7 @@ import fetch from './fetch';
 import { FetchOptions } from '@turist/fetch/dist/types';
 import { Response } from 'node-fetch';
 import { parse as parseContentType } from 'content-type';
-import getEnv from './get-env';
+import { TENANT_ID, CLIENT_ID, CLIENT_SECRET } from './config';
 
 type OauthToken = {
 	token_type: string;
@@ -25,7 +25,6 @@ class GraphApiError extends Error {
 }
 
 const RESOURCE = 'https://graph.microsoft.com/';
-const [TENANT_ID, CLIENT_ID, CLIENT_SECRET] = getEnv('TENANT_ID', 'CLIENT_ID', 'CLIENT_SECRET');
 let tokenPromise: Promise<OauthToken> | null;
 let tokenTimeout: ReturnType<typeof setTimeout> | null;
 

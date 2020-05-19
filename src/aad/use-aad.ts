@@ -6,12 +6,14 @@ import jwt from 'jsonwebtoken';
 import { auth, getAToken } from './auth';
 import { AuthOpts, ParsedRequestOpts } from '../types';
 import { sendError, sendAuthSystemError } from '../error';
-import { USE_SECURE_COOKIES, USE_AAD_AUTH_COOKIE_NAME as aadAuthCookieName } from '../config';
+import {
+	USE_SECURE_COOKIES,
+	USE_AAD_AUTH_COOKIE_NAME as aadAuthCookieName,
+	USE_AAD_JWT_SECRET as jwtSecret,
+} from '../config';
 
 const { router, on, otherwise } = Router;
 const jwtVerify = promisify(jwt.verify);
-
-const { USE_AAD_JWT_SECRET: jwtSecret } = process.env;
 
 function logout(req: IncomingMessage, res: ServerResponse, opts: AuthOpts) {
 	const expires = new Date(0);

@@ -6,14 +6,14 @@ import { AuthenticationContext, TokenResponse } from 'adal-node';
 import jwt from 'jsonwebtoken';
 import { sendAuthSystemError, sendError } from '../error';
 import { AuthOpts } from '../types';
-import { USE_SECURE_COOKIES, USE_AAD_AUTH_COOKIE_NAME as authCookieName } from '../config';
-
-const {
-	USE_AAD_CLIENT_ID: clientId,
-	USE_AAD_CLIENT_SECRET: clientSecret,
-	USE_AAD_AUTHORITY_URL: authorityUrl,
-	USE_AAD_JWT_SECRET: jwtSecret,
-} = process.env;
+import {
+	USE_SECURE_COOKIES,
+	USE_AAD_AUTH_COOKIE_NAME as authCookieName,
+	USE_AAD_CLIENT_ID as clientId,
+	USE_AAD_CLIENT_SECRET as clientSecret,
+	USE_AAD_AUTHORITY_URL as authorityUrl,
+	USE_AAD_JWT_SECRET as jwtSecret,
+} from '../config';
 
 const resource = 'https://graph.microsoft.com';
 
