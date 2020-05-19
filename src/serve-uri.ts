@@ -3,7 +3,7 @@ import { IncomingMessage, ServerResponse } from 'micri';
 import _apiFetch from './fetch-graph-api';
 import execFile from './exec-file';
 import getEnv from './get-env';
-import promiseCache from './promise-cache';
+import promiseCache from './cache/promise-cache';
 import sendFile from './send-file';
 import sendFileList from './send-file-list';
 import { CACHE_SEC, HIDDEN_FILES, INDEX_PATTERN, PROTECTED_FILES } from './config';

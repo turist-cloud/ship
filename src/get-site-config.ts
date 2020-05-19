@@ -3,7 +3,7 @@ import * as defaultConfig from './config';
 import apiFetch from './fetch-graph-api';
 import fetch from './fetch';
 import getEnv from './get-env';
-import promiseCache from './promise-cache';
+import promiseCache from './cache/promise-cache';
 import { DirectoryListing, File, Folder } from './graph-api-types';
 import { initRoutes, initHooks } from './routes';
 
