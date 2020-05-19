@@ -1,5 +1,5 @@
 import { IncomingMessage, ServerResponse } from 'micri';
-import { sendError } from './error';
+import { sendError } from '../error';
 
 // These methods are allowd for static resources: files and folder listings.
 const ALLOW_METHODS = ['GET', 'HEAD', 'OPTIONS'];

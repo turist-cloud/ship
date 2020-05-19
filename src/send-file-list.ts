@@ -1,7 +1,7 @@
 import { send, IncomingMessage, ServerResponse } from 'micri';
 import { parseAll } from '@hapi/accept';
-import allowedMethod from './allowed-method';
-import setVary from './set-vary';
+import allowedMethod from './headers/allowed-method';
+import setVary from './headers/set-vary';
 import { File, Folder } from './graph-api-types';
 
 /**

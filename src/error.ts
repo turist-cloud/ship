@@ -2,7 +2,7 @@ import { STATUS_CODES } from 'http';
 import { send, IncomingMessage, ServerResponse } from 'micri';
 import { parseAll } from '@hapi/accept';
 import serveUri from './serve-uri';
-import setVary from './set-vary';
+import setVary from './headers/set-vary';
 import { SiteConfig } from './get-site-config';
 
 export interface TuristError {

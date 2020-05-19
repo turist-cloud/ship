@@ -1,9 +1,9 @@
 import { createHash } from 'crypto';
 import { Headers } from 'node-fetch';
 import { IncomingMessage, ServerResponse, send } from 'micri';
-import allowedMethod from './allowed-method';
+import allowedMethod from './headers/allowed-method';
 import fetch from './fetch';
-import setVary from './set-vary';
+import setVary from './headers/set-vary';
 import { CACHE_CONTROL_PUBLIC, CACHE_CONTROL_PRIVATE } from './config';
 import { File } from './graph-api-types';
 import { SiteConfig } from './get-site-config';
