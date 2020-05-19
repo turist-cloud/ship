@@ -7,7 +7,7 @@ import apiFetch from './fetch-graph-api';
 import getEnv from './get-env';
 import getSiteConfig from './get-site-config';
 import serveUri from './serve-uri';
-import useAAD from './use-aad';
+import useAAD from './aad/use-aad';
 import { ParsedRequestOpts } from './types';
 import { sendError } from './error';
 

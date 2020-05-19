@@ -4,9 +4,9 @@ import { IncomingMessage, ServerResponse, MicriHandler, Router } from 'micri';
 import Cookies from 'cookies';
 import jwt from 'jsonwebtoken';
 import { auth, getAToken } from './auth';
-import { AuthOpts, ParsedRequestOpts } from './types';
-import { sendError, sendAuthSystemError } from './error';
-import { USE_SECURE_COOKIES, USE_AAD_AUTH_COOKIE_NAME as aadAuthCookieName } from './config';
+import { AuthOpts, ParsedRequestOpts } from '../types';
+import { sendError, sendAuthSystemError } from '../error';
+import { USE_SECURE_COOKIES, USE_AAD_AUTH_COOKIE_NAME as aadAuthCookieName } from '../config';
 
 const { router, on, otherwise } = Router;
 const jwtVerify = promisify(jwt.verify);

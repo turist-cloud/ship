@@ -4,9 +4,9 @@ import { IncomingMessage, ServerResponse } from 'http';
 import { send } from 'micri';
 import { AuthenticationContext, TokenResponse } from 'adal-node';
 import jwt from 'jsonwebtoken';
-import { sendAuthSystemError, sendError } from './error';
-import { AuthOpts } from './types';
-import { USE_SECURE_COOKIES, USE_AAD_AUTH_COOKIE_NAME as authCookieName } from './config';
+import { sendAuthSystemError, sendError } from '../error';
+import { AuthOpts } from '../types';
+import { USE_SECURE_COOKIES, USE_AAD_AUTH_COOKIE_NAME as authCookieName } from '../config';
 
 const {
 	USE_AAD_CLIENT_ID: clientId,
