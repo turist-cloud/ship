@@ -1,4 +1,4 @@
-import promiseCache from '../src/promise-cache';
+import promiseCache from '../src/cache/promise-cache';
 
 function createFakeCache() {
 	const data: { [index: string]: any } = {};

@@ -1,5 +1,5 @@
 import ms from 'ms';
-import SWR from '../src/swr';
+import SWR from '../src/cache/swr';
 
 const sleep = (t: string) => new Promise((r) => setTimeout(r, ms(t)));
 
