@@ -1,4 +1,6 @@
+import { join as pathJoin } from 'path';
 import ms from 'ms';
+import { HttpVersion } from './types';
 
 /**
  * Get environment variables or fail.
@@ -52,8 +54,48 @@ assert(
 export const SERVER_MODE = process.env.SERVER_MODE || 'proxied';
 assert(['proxied', 'standalone'].includes(SERVER_MODE), `Invalid SERVER_MODE: ${SERVER_MODE}`);
 
-export const HTTP_VERSION = process.env.HTTP_VERSION || '1.1';
+/**
+ * Enable TLS.
+ */
 export const ENABLE_TLS = process.env.ENABLE_TLS === '1' || false;
+
+/**
+ * Static certificate files.
+ * [[domains], certificate.pem, private_key.pem]
+ */
+export const TLS_STATIC_CERTS: [[string[], string, string]] = [
+	[['localhost'], pathJoin(__dirname, '../cert.pem'), pathJoin(__dirname, '../key.pem')],
+];
+
+export const TLS_DH_PARAMS_PATH: string = pathJoin(__dirname, '../dhparam.pem');
+
+/**
+ * Minimum TLS version.
+ */
+export const TLS_MIN_VERSION = 'TLSv1.3';
+
+/**
+ * Maximum TLS version.
+ */
+export const TLS_MAX_VERSION = 'TLSv1.3';
+
+/**
+ * TLS Ciphers.
+ */
+export const TLS_CIPHERS = 'TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256';
+
+const httpVersion = process.env.HTTP_VERSION;
+if (httpVersion !== '1.1' && httpVersion !== '2') {
+	// eslint-disable-next-line no-console
+	console.error('Unsupported HTTP version');
+	process.exit(1);
+}
+
+/**
+ * HTTP version.
+ */
+export const HTTP_VERSION: HttpVersion = httpVersion || '1.1';
+
 export const ENABLE_ALPN = process.env.ENABLE_ALPN === '1' || (HTTP_VERSION === '2' && ENABLE_TLS);
 assert(!ENABLE_ALPN || (ENABLE_ALPN && ENABLE_TLS && HTTP_VERSION === '2'), 'Cannot enable ALPN');
 export const PORT = process.env.PORT || SERVER_MODE === 'proxied' ? 3000 : ENABLE_TLS ? 443 : 80;
