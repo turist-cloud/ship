@@ -39,7 +39,7 @@ redirect server and it's not to serve anything over HTTP/1.1 when TLS
 is enabled `ENABLE_TLS=1`.
 
 | HTTP Config         | default PORT | `SERVER_MODE` | `HTTP_VERSION` | `ENABLE_TLS` | `ENABLE_ALPN` |
-|---------------------|-------------+|---------------|----------------|--------------|---------------|
+|---------------------|-------------:|--------------:|---------------:|-------------:|--------------:|
 | HTTP/1.1            |         3000 | `proxied`     | `1.1`          |              |               |
 | HTTP/1.1            |           80 | `standalone`  | `2`            |              |               |
 | HTTP/2              |         3000 | `proxied`     | `2`            |              |               |
