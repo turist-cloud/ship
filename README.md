@@ -8,6 +8,7 @@ Ship websites like it's the 90's again! FTP FTW
   - build steps
   - previews
 - Just File Transfer Protocols!
+- Built-in TLS and HTTP/2 support
 - Compatible with [Next.js](https://nextjs.org/) serverless target [READ MORE](/docs/examples/next.js-demo)
 - Optional Azure AD authentication for websites [READ MORE](/docs/use-add.md)
 
@@ -16,6 +17,7 @@ Documentation
 
 - [Deploying](/docs/deploying.md)
 - [Configuration](/docs/config.md)
+- [TLS and HTTP/2](/docs/tls.md)
 - [Functions](/docs/functions.md)
 - [Azure AD Authentication](/docs/use-add.md)
 
