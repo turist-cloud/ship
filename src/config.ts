@@ -98,8 +98,8 @@ export const HTTP_VERSION: HttpVersion = httpVersion || '1.1';
 
 export const ENABLE_ALPN = process.env.ENABLE_ALPN === '1' || (HTTP_VERSION === '2' && ENABLE_TLS);
 assert(!ENABLE_ALPN || (ENABLE_ALPN && ENABLE_TLS && HTTP_VERSION === '2'), 'Cannot enable ALPN');
-export const PORT = process.env.PORT || SERVER_MODE === 'proxied' ? 3000 : ENABLE_TLS ? 443 : 80;
-export const PORT_HTTP = SERVER_MODE === 'standalone' && ENABLE_TLS ? process.env.PORT_HTTP || 80 : undefined;
+export const PORT = Number(process.env.PORT) || (SERVER_MODE === 'proxied' ? 3000 : ENABLE_TLS ? 443 : 80);
+export const PORT_HTTP = SERVER_MODE === 'standalone' && (ENABLE_TLS ? Number(process.env.PORT_HTTP) || 80 : undefined);
 
 /**
  * Cache TTL.
