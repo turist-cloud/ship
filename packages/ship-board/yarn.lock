@@ -444,10 +444,10 @@
   dependencies:
     type-detect "4.0.8"
 
-"@turist/fetch@7.1.5":
-  version "7.1.5"
-  resolved "https://registry.yarnpkg.com/@turist/fetch/-/fetch-7.1.5.tgz#48ba883785e93e5dabc344260cac488b8e883248"
-  integrity sha512-PIAAtQ7W8KkFDh3Skmmi0WAwZgA740jRNCRcw95Orxk0I+zX9waNK5RFfBrkD6hX3/xuDlGO9U2ug08BAZPNmA==
+"@turist/fetch@7.1.7":
+  version "7.1.7"
+  resolved "https://registry.yarnpkg.com/@turist/fetch/-/fetch-7.1.7.tgz#a2b1f7ec0265e6fe0946c51eef34bad9b9efc865"
+  integrity sha512-XP20kvfyMNlWdPVQXyuzA40LoCHbbJptikt7W+TlZ5sS+NNjk70xjXCtHBLEudp7li3JldXEFSIUzpW1a0WEhA==
   dependencies:
     "@types/node-fetch" "2"
 
@@ -634,7 +634,17 @@ adal-node@0.2.1:
     xmldom ">= 0.1.x"
     xpath.js "~1.1.0"
 
-ajv@6.12.2, ajv@^6.10.0, ajv@^6.10.2, ajv@^6.5.5:
+ajv@6.12.4:
+  version "6.12.4"
+  resolved "https://registry.yarnpkg.com/ajv/-/ajv-6.12.4.tgz#0614facc4522127fa713445c6bfd3ebd376e2234"
+  integrity sha512-eienB2c9qVQs2KWexhkrdMLVDoIQCz5KSeLxwg9Lzk4DOfBtIK9PQwwufcsn1jjGuf9WZmqPMbGxOzfcuphJCQ==
+  dependencies:
+    fast-deep-equal "^3.1.1"
+    fast-json-stable-stringify "^2.0.0"
+    json-schema-traverse "^0.4.1"
+    uri-js "^4.2.2"
+
+ajv@^6.10.0, ajv@^6.10.2, ajv@^6.5.5:
   version "6.12.2"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-6.12.2.tgz#c629c5eced17baf314437918d2da88c99d5958cd"
   integrity sha512-k+V+hzjm5q/Mr8ef/1Y9goCmlsK4I6Sm74teeyGvFk1XrOsbsKLjEdrvny42CZ+a8sXbk8KWpY/bDwS+FLL2UQ==
@@ -2795,10 +2805,10 @@ nice-try@^1.0.4:
   resolved "https://registry.yarnpkg.com/nice-try/-/nice-try-1.0.5.tgz#a3378a7696ce7d223e88fc9b764bd7ef1089e366"
   integrity sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==
 
-node-fetch@2.6.0:
-  version "2.6.0"
-  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.0.tgz#e633456386d4aa55863f676a7ab0daa8fdecb0fd"
-  integrity sha512-8dG4H5ujfvFiqDmVu9fQ5bOHUC15JMjMY/Zumv26oOvvVJjM67KF8koCWIabKQ1GJIa9r2mMZscBq/TbdOcmNA==
+node-fetch@2.6.1:
+  version "2.6.1"
+  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.1.tgz#045bd323631f76ed2e2b55573394416b639a0052"
+  integrity sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==
 
 node-int64@^0.4.0:
   version "0.4.0"
