@@ -23,7 +23,7 @@
     "lru-cache": "5.1.1",
     "micri": "4.2.0",
     "ms": "2.1.2",
-    "node-fetch": "2.6.0"
+    "node-fetch": "2.6.1"
   },
   "devDependencies": {
     "@types/content-type": "1.1.3",
