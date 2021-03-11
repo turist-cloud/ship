@@ -468,10 +468,10 @@
   dependencies:
     type-detect "4.0.8"
 
-"@turist/fetch@7.1.4":
-  version "7.1.4"
-  resolved "https://registry.yarnpkg.com/@turist/fetch/-/fetch-7.1.4.tgz#6ff1d01361b0431bacdcf182c69159f43d57b651"
-  integrity sha512-nc/Bn+qUUjs/0pgnw1euyKbB0iDrl+Y/FZ4a7frtMJOML7pftqS3/Sh5+m0HJG7/UGhwUSXt/w0+MuwQxxuRrA==
+"@turist/fetch@7.1.7":
+  version "7.1.7"
+  resolved "https://registry.yarnpkg.com/@turist/fetch/-/fetch-7.1.7.tgz#a2b1f7ec0265e6fe0946c51eef34bad9b9efc865"
+  integrity sha512-XP20kvfyMNlWdPVQXyuzA40LoCHbbJptikt7W+TlZ5sS+NNjk70xjXCtHBLEudp7li3JldXEFSIUzpW1a0WEhA==
   dependencies:
     "@types/node-fetch" "2"
 

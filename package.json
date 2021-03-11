@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@hapi/accept": "5.0.1",
-    "@turist/fetch": "7.1.4",
+    "@turist/fetch": "7.1.7",
     "access-log": "0.4.1",
     "adal-node": "0.2.1",
     "async-sema": "3.1.0",
