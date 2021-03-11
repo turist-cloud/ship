@@ -13,7 +13,8 @@ import { IGNORE_PATH, DEFAULT_IGNORE_PATTERNS } from './config';
 const { open } = fs.promises;
 
 const CHUNK_SIZE = 983040;
-const MAX_CONCURRENT = 40;
+//const MAX_CONCURRENT = 40;
+const MAX_CONCURRENT = 1;
 
 async function uploadChunk(uploadUrl: string, rangeHeader: string, chunk: Buffer) {
 	const res = await fetch(uploadUrl, {
