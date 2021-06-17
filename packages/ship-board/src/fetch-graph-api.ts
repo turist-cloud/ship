@@ -26,7 +26,7 @@ export default async function fetchAPI(adal: Adal, path: string, opts: FetchOpti
 		tokenPromise = adal.acquireAuthToken(RESOURCE);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	const { tokenType, expiresIn, accessToken } = await tokenPromise;
 	if (!tokenTimeout) {

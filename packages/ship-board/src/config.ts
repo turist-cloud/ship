@@ -67,7 +67,7 @@ export function readConfig(configFilePath: string): Config {
 		process.exit(1);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	return config;
 }
