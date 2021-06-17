@@ -31,62 +31,62 @@ function logout(req: IncomingMessage, res: ServerResponse, opts: AuthOpts) {
 	res.end();
 }
 
-const authReq = (hndl: MicriHandler): MicriHandler => async (
-	req: IncomingMessage,
-	res: ServerResponse,
-	opts: AuthOpts
-) => {
-	if (['/auth', '/token', '/logout'].includes(opts.pathname)) {
-		return hndl(req, res, opts);
-	}
-
-	if (!jwtSecret) {
-		return sendAuthSystemError(req, res, opts.siteConfig);
-	}
-
-	try {
-		const token = opts.cookies.get(aadAuthCookieName);
-
-		if (!token) {
-			// Not authenticated so redirect to auth on server-side.
-			return auth(req, res, opts);
+const authReq =
+	(hndl: MicriHandler): MicriHandler =>
+	async (req: IncomingMessage, res: ServerResponse, opts: AuthOpts) => {
+		if (['/auth', '/token', '/logout'].includes(opts.pathname)) {
+			return hndl(req, res, opts);
 		}
 
-		const decoded = (await jwtVerify(token, jwtSecret)) as {
-			name: string;
-			my_tenant: string;
-			my_accessToken: string;
-		};
-
-		if (
-			typeof decoded.name !== 'string' ||
-			typeof decoded.my_tenant !== 'string' ||
-			typeof decoded.my_accessToken !== 'string'
-		) {
-			throw new Error('Bail out');
+		if (!jwtSecret) {
+			return sendAuthSystemError(req, res, opts.siteConfig);
 		}
 
-		return hndl(req, res, opts);
-	} catch (err) {
-		// eslint-disable-next-line no-console
-		console.error(err);
+		try {
+			const token = opts.cookies.get(aadAuthCookieName);
 
-		return sendError(req, res, 403, {
-			code: 'forbidden',
-			message: 'Forbidden',
+			if (!token) {
+				// Not authenticated so redirect to auth on server-side.
+				return auth(req, res, opts);
+			}
+
+			const decoded = (await jwtVerify(token, jwtSecret)) as {
+				name: string;
+				my_tenant: string;
+				my_accessToken: string;
+			};
+
+			if (
+				typeof decoded.name !== 'string' ||
+				typeof decoded.my_tenant !== 'string' ||
+				typeof decoded.my_accessToken !== 'string'
+			) {
+				throw new Error('Bail out');
+			}
+
+			return hndl(req, res, opts);
+		} catch (err) {
+			// eslint-disable-next-line no-console
+			console.error(err);
+
+			return sendError(req, res, 403, {
+				code: 'forbidden',
+				message: 'Forbidden',
+			});
+		}
+	};
+
+const parsePath =
+	(hndl: MicriHandler): MicriHandler =>
+	(req: IncomingMessage, res: ServerResponse, opts: AuthOpts) => {
+		const url = parse(req.url || '/', true);
+
+		return hndl(req, res, {
+			...(opts || {}),
+			query: url.query,
+			cookies: new Cookies(req, res),
 		});
-	}
-};
-
-const parsePath = (hndl: MicriHandler): MicriHandler => (req: IncomingMessage, res: ServerResponse, opts: AuthOpts) => {
-	const url = parse(req.url || '/', true);
-
-	return hndl(req, res, {
-		...(opts || {}),
-		query: url.query,
-		cookies: new Cookies(req, res),
-	});
-};
+	};
 
 export default (hndl: MicriHandler): MicriHandler =>
 	parsePath(

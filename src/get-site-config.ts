@@ -116,28 +116,25 @@ const getDirList = promiseCache<Array<File | Folder>>(dirCache, async () => {
 	return res.value;
 });
 
-const getSiteConfig = promiseCache(
-	configCache,
-	async (host: string): Promise<SiteConfig> => {
-		const dir = await getDirList();
-		const configFile = dir.find((o: any) => o.file && o.name === `${host}.json`) as File | undefined;
+const getSiteConfig = promiseCache(configCache, async (host: string): Promise<SiteConfig> => {
+	const dir = await getDirList();
+	const configFile = dir.find((o: any) => o.file && o.name === `${host}.json`) as File | undefined;
 
-		if (!configFile) {
-			return defaultSiteConfig;
-		}
-
-		const res = await fetch(configFile['@microsoft.graph.downloadUrl']);
-		const body = await res.json();
-
-		return {
-			...defaultSiteConfig,
-			...body,
-			functionsPattern: body.functionsPattern
-				? new RegExp(body.functionsPattern)
-				: defaultSiteConfig.functionsPattern,
-			routes: body.routes ? initRoutes(body.routes) : defaultSiteConfig.routes,
-			hooks: body.hooks ? initHooks(body.hooks) : defaultSiteConfig.hooks,
-		};
+	if (!configFile) {
+		return defaultSiteConfig;
 	}
-);
+
+	const res = await fetch(configFile['@microsoft.graph.downloadUrl']);
+	const body = await res.json();
+
+	return {
+		...defaultSiteConfig,
+		...body,
+		functionsPattern: body.functionsPattern
+			? new RegExp(body.functionsPattern)
+			: defaultSiteConfig.functionsPattern,
+		routes: body.routes ? initRoutes(body.routes) : defaultSiteConfig.routes,
+		hooks: body.hooks ? initHooks(body.hooks) : defaultSiteConfig.hooks,
+	};
+});
 export default getSiteConfig;

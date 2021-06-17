@@ -18,7 +18,8 @@ import { USE_AAD_CLIENT_ID } from './config';
 
 type ShipOpts = ReturnType<typeof parseRequest>;
 
-const HOSTNAME_RE = /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/;
+const HOSTNAME_RE =
+	/^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/;
 
 // Select HTTP/1.1 or HTTP/2 specific functions.
 function getHTTPFunctions(httpVersion: HttpVersion, enableAlpn: boolean) {
