@@ -3,7 +3,7 @@ import { AnyCache } from './promise-cache';
 
 type RevalidateFn<T> = (key: string, value: T) => Promise<T | null>;
 
-export type SWROpts<T extends object> = {
+export type SWROpts<T> = {
 	max?: number;
 	maxAge: number;
 	length?: (n: T, key: string) => number;
@@ -27,7 +27,7 @@ export class SWRError extends Error {
 /**
  * A stale-while-revalidate LRU cache.
  */
-export default class SWR<T extends object> implements AnyCache {
+export default class SWR<T> implements AnyCache {
 	#lru: LRU<string, T>;
 	#revalidateMap: WeakMap<any, { revalidateAfterTs: number; revalidating: boolean }>;
 	#revalidateAfter: number;

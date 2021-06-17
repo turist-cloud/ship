@@ -50,6 +50,7 @@ const authReq =
 				return auth(req, res, opts);
 			}
 
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
 			const decoded = (await jwtVerify(token, jwtSecret)) as {
 				name: string;
