@@ -50,6 +50,7 @@ const authReq =
 				return auth(req, res, opts);
 			}
 
+			// @ts-ignore
 			const decoded = (await jwtVerify(token, jwtSecret)) as {
 				name: string;
 				my_tenant: string;
