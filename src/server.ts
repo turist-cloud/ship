@@ -100,7 +100,7 @@ export function getServe(
 						allowHTTP1: enableAlpn,
 						SNICallback,
 					},
-					// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 					// @ts-ignore Currently Micri isn't exactly aware of HTTP/2
 					(req: IncomingMessage, res: ServerResponse) => run<ShipOpts>(req, res, fn)
 				);
@@ -110,7 +110,7 @@ export function getServe(
 			createHttp1Server((req: IncomingMessage, res: ServerResponse) => run<ShipOpts>(req, res, fn));
 	} else if (httpVersion === '2') {
 		return (fn: MicriHandler<ShipOpts>): Http2Server =>
-			// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore Currently Micri isn't exactly aware of HTTP/2
 			createHttp2Server((req, res) => run<OptsType>(req, res, fn));
 	}

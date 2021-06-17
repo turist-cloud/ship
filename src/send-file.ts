@@ -88,7 +88,7 @@ export default async function sendFile(
 	const data = await fetch(file['@microsoft.graph.downloadUrl'], {
 		method,
 		compress: false,
-		// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		headers: reqHeaders,
 	});
