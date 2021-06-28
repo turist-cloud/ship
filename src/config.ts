@@ -124,6 +124,10 @@ export const HIDDEN_FILES = [/^\./, ...PROTECTED_FILES];
  */
 export const INDEX_PATTERN = /^index\..*/i;
 
+export const USE_SERVER_PUSH_HINTS = false;
+
+export const USE_LINK_HEADER = false;
+
 /**
  * Enable serving functions by default.
  */

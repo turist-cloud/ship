@@ -32,6 +32,15 @@ export type SiteConfig = {
 	 */
 	dirListing: boolean;
 	/**
+	 * HTTP/2 Server Push and HTTP/1.1 Link hints.
+	 */
+	useServerPushHints?: boolean;
+	/**
+	 * Use Link header to help HTTP/2 Server Push implemented by a proxy
+	 * in front of Ship.
+	 */
+	useLinkHeader?: boolean;
+	/**
 	 * AAD Authentication.
 	 */
 	useAAD?: boolean;
@@ -89,6 +98,8 @@ export type SiteConfig = {
 };
 
 const defaultSiteConfig: SiteConfig = {
+	useServerPushHints: defaultConfig.USE_SERVER_PUSH_HINTS,
+	useLinkHeader: defaultConfig.USE_LINK_HEADER,
 	customErrors: {},
 	dirListing: defaultConfig.ENABLE_DIR_LISTING,
 	functions: defaultConfig.ENABLE_FUNCTIONS,
