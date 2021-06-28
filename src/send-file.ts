@@ -141,7 +141,7 @@ export default async function sendFile(
 	res.setHeader('Content-Disposition', `inline; filename="${file.name}"`);
 	if (siteConfig.useLinkHeader && serverPushFiles && serverPushFiles.length > 0) {
 		// This works with CloudFlare but other CDNs and proxies might use some other tricks.
-		res.setHeader('Link', serverPushFiles.map((s) => `<${s}>; rel=preload`).join(', '));
+		res.setHeader('Link', serverPushFiles.map((s) => `<${s}>; rel="preload"`).join(', '));
 	}
 	passResponseHeaders(data.headers, res, PASSED_HEADERS);
 
