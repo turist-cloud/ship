@@ -1,6 +1,7 @@
 import { createHash } from 'crypto';
 import { Headers } from 'node-fetch';
 import { IncomingMessage, ServerResponse, send } from 'micri';
+import { ServerPushHint } from './server-push-hints';
 import allowedMethod from './headers/allowed-method';
 import fetch from './fetch';
 import setVary from './headers/set-vary';
@@ -61,7 +62,7 @@ export default async function sendFile(
 	res: ServerResponse,
 	file: File,
 	siteConfig: SiteConfig,
-	serverPushFiles?: string[]
+	serverPush?: ServerPushHint[]
 ): Promise<void> {
 	// Some methods are not allowed here and some will need special
 	// handling.
@@ -139,9 +140,9 @@ export default async function sendFile(
 	}
 
 	res.setHeader('Content-Disposition', `inline; filename="${file.name}"`);
-	if (siteConfig.useLinkHeader && serverPushFiles && serverPushFiles.length > 0) {
+	if (siteConfig.useLinkHeader && serverPush && serverPush.length > 0) {
 		// This works with CloudFlare but other CDNs and proxies might use some other tricks.
-		res.setHeader('Link', serverPushFiles.map((s) => `<${s}>; rel="preload"`).join(', '));
+		res.setHeader('Link', serverPush.map((h: ServerPushHint) => `<${h.path}>; rel=preload; as=${h.as}`).join(', '));
 	}
 	passResponseHeaders(data.headers, res, PASSED_HEADERS);
 

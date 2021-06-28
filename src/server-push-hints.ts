@@ -4,8 +4,13 @@ import fetch from './fetch';
 import promiseCache from './cache/promise-cache';
 import { getMeta } from './graph-api';
 
-export type ServerPushHints = {
-	[index: string]: string[];
+export type ServerPushHint = {
+	path: string;
+	as: 'audio' | 'video' | 'track' | 'script' | 'style' | 'image' | 'worker' | 'embed' | 'object' | 'document';
+};
+
+type ServerPushHints = {
+	[index: string]: ServerPushHint[];
 };
 
 const hintsCache = new LRU<string, Promise<ServerPushHints>>({
@@ -24,7 +29,7 @@ const getServerPushHints = promiseCache(hintsCache, async (host: string, path: s
 	return res.ok ? res.json() : {};
 });
 
-export default async function getServerPushHint(host: string, path: string): Promise<string[]> {
+export default async function getServerPushHint(host: string, path: string): Promise<ServerPushHint[]> {
 	const hints = await getServerPushHints(host, path);
 
 	return hints[basename(path)] || [];
