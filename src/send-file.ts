@@ -94,27 +94,30 @@ async function push(host: string, stream: Http2Stream, serverPush: ServerPushHin
 	for (const { path } of serverPush) {
 		const pushHeaders = { [http2Constants.HTTP2_HEADER_PATH]: path };
 
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		stream.pushStream(pushHeaders, (err, pushStream, headers) => {
 			if (err) {
+				// eslint-disable-next-line no-console
 				console.error('Server Push failed:', err); // TODO Better error
 				return;
 			}
 
 			fetch(`https://${host}${path}`, {
 				method: 'GET',
-				compress: false
-			}).then((res) => {
-				if (res.status === 200) {
-					console.log('pushing', path);
-					pushStream.respond({
-						[http2Constants.HTTP2_HEADER_STATUS] : 200,
-						...passPushHeaders(res.headers),
-					});
-					res.body.pipe(pushStream);
-					//pushStream.end();
-				}
-			}).catch((err) => console.error('Failed to push', err));
+				compress: false,
+			})
+				.then((res) => {
+					if (res.status === 200) {
+						pushStream.respond({
+							[http2Constants.HTTP2_HEADER_STATUS]: 200,
+							...passPushHeaders(res.headers),
+						});
+						res.body.pipe(pushStream);
+					}
+				})
+				// eslint-disable-next-line no-console
+				.catch((err) => console.error('Failed to push', err));
 		});
 	}
 }
@@ -202,11 +205,13 @@ export default async function sendFile(
 		return;
 	}
 
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
-	const isHttp2: boolean = !!res.stream;
+	const isHttp2 = !!res.stream;
 
 	// Try pushing the dependencies
 	if (isHttp2 && serverPush && serverPush.length > 0) {
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		const http2stream = res.stream;
 		if (http2stream && http2stream.pushAllowed) {
