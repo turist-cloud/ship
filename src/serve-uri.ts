@@ -48,7 +48,7 @@ export default async function serveUri(
 					if (shouldExec(siteConfig, pathname)) {
 						return execFile(req, res, siteConfig, meta);
 					} else {
-						return sendFile(req, res, meta, siteConfig);
+						return sendFile(host, req, res, meta, siteConfig);
 					}
 				}
 			}
@@ -73,7 +73,7 @@ export default async function serveUri(
 			const serverPushFiles = siteConfig.useServerPushHints
 				? await getServerPushHint(host, indexPath)
 				: undefined;
-			return sendFile(req, res, index, siteConfig, serverPushFiles);
+			return sendFile(host, req, res, index, siteConfig, serverPushFiles);
 		} else {
 			if (siteConfig.dirListing) {
 				return sendFileList(
@@ -92,7 +92,7 @@ export default async function serveUri(
 		}
 
 		const serverPushFiles = siteConfig.useServerPushHints ? await getServerPushHint(host, pathname) : undefined;
-		return sendFile(req, res, meta, siteConfig, serverPushFiles);
+		return sendFile(host, req, res, meta, siteConfig, serverPushFiles);
 	}
 
 	return sendNotFoundError(req, res, siteConfig);

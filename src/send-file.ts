@@ -1,3 +1,4 @@
+import { Http2Stream, constants as http2Constants } from 'http2';
 import { createHash } from 'crypto';
 import { Headers } from 'node-fetch';
 import { IncomingMessage, ServerResponse, send } from 'micri';
@@ -10,6 +11,24 @@ import { File } from './graph-api-types';
 import { SiteConfig } from './get-site-config';
 import { sendNotFoundError, sendError } from './error';
 import { weakEtagMatch } from './etag-match';
+
+const PASSED_HEADERS = [
+	'accept-ranges',
+	'transfer-encoding',
+	'content-type',
+	'content-range',
+	'content-encoding',
+	'content-length',
+	'date',
+];
+const PASSED_HEADERS_HTTP2 = [
+	'accept-ranges',
+	'content-type',
+	'content-range',
+	'content-encoding',
+	'content-length',
+	'date',
+];
 
 function makeReqHeaders(req: IncomingMessage) {
 	const headers: { [key: string]: string | string[] } = {};
@@ -36,15 +55,29 @@ function passResponseHeaders(headers: Headers, res: ServerResponse, list: string
 	}
 }
 
-const PASSED_HEADERS = [
-	'accept-ranges',
-	'transfer-encoding',
-	'content-type',
-	'content-range',
-	'content-encoding',
-	'content-length',
-	'date',
-];
+function passPushHeaders(headers: Headers): { [index: string]: string | string[] } {
+	const passed_headers = [
+		'accept-ranges',
+		'cache-control',
+		'content-disposition',
+		'content-encoding',
+		'content-length',
+		'content-range',
+		'content-type',
+		'date',
+		'etag',
+	];
+	const out: { [index: string]: string | string[] } = {};
+
+	for (const name of passed_headers) {
+		const value = headers.get(name);
+		if (value) {
+			out[name] = value;
+		}
+	}
+
+	return out;
+}
 
 function joinHeaderValues(header: string | string[] | undefined): string | null {
 	if (header == null) {
@@ -57,7 +90,37 @@ function joinHeaderValues(header: string | string[] | undefined): string | null 
 	return header.join(', ');
 }
 
+async function push(host: string, stream: Http2Stream, serverPush: ServerPushHint[]) {
+	for (const { path } of serverPush) {
+		const pushHeaders = { [http2Constants.HTTP2_HEADER_PATH]: path };
+
+		// @ts-ignore
+		stream.pushStream(pushHeaders, (err, pushStream, headers) => {
+			if (err) {
+				console.error('Server Push failed:', err); // TODO Better error
+				return;
+			}
+
+			fetch(`https://${host}${path}`, {
+				method: 'GET',
+				compress: false
+			}).then((res) => {
+				if (res.status === 200) {
+					console.log('pushing', path);
+					pushStream.respond({
+						[http2Constants.HTTP2_HEADER_STATUS] : 200,
+						...passPushHeaders(res.headers),
+					});
+					res.body.pipe(pushStream);
+					//pushStream.end();
+				}
+			}).catch((err) => console.error('Failed to push', err));
+		});
+	}
+}
+
 export default async function sendFile(
+	host: string,
 	req: IncomingMessage,
 	res: ServerResponse,
 	file: File,
@@ -139,12 +202,24 @@ export default async function sendFile(
 		return;
 	}
 
+	// @ts-ignore
+	const isHttp2: boolean = !!res.stream;
+
+	// Try pushing the dependencies
+	if (isHttp2 && serverPush && serverPush.length > 0) {
+		// @ts-ignore
+		const http2stream = res.stream;
+		if (http2stream && http2stream.pushAllowed) {
+			push(host, http2stream, serverPush);
+		}
+	}
+
 	res.setHeader('Content-Disposition', `inline; filename="${file.name}"`);
 	if (siteConfig.useLinkHeader && serverPush && serverPush.length > 0) {
 		// This works with CloudFlare but other CDNs and proxies might use some other tricks.
 		res.setHeader('Link', serverPush.map((h: ServerPushHint) => `<${h.path}>; rel=preload; as=${h.as}`).join(', '));
 	}
-	passResponseHeaders(data.headers, res, PASSED_HEADERS);
 
+	passResponseHeaders(data.headers, res, isHttp2 ? PASSED_HEADERS_HTTP2 : PASSED_HEADERS);
 	send(res, data.status, data.body);
 }

@@ -9,7 +9,9 @@ Ship websites like it's the 90's again! FTP FTW
   - previews
 - Just File Transfer Protocols!
 - Built-in TLS and HTTP/2 support
-- Static HTTP/2 Server Push with CloudFlare
+- Static HTTP/2 Server Push
+  - Link headers that work with CloudFlare over HTTP/1.1
+  - Real HTTP/2 Server Push when operating in HTTP/2 mode
 - Compatible with [Next.js](https://nextjs.org/) serverless target [READ MORE](/docs/examples/next.js-demo)
 - Optional Azure AD authentication for websites [READ MORE](/docs/use-add.md)
 
