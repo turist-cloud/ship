@@ -2705,10 +2705,10 @@ merge2@^1.3.0:
   resolved "https://registry.yarnpkg.com/merge2/-/merge2-1.4.1.tgz#4368892f885e907455a6fd7dc55c0c9d404990ae"
   integrity sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==
 
-micri@4.5.0:
-  version "4.5.0"
-  resolved "https://registry.yarnpkg.com/micri/-/micri-4.5.0.tgz#407d05c4d11a6967c9757b3bd95235cf9264a839"
-  integrity sha512-HcfgPyvXUHZXnA6OopIHg1c1lcyakoBPmgxiZGIiguvERDn7Kx3a3oar867IiLS3bTtfhnNwQ7Kgi/dNf5xctg==
+micri@4.5.1:
+  version "4.5.1"
+  resolved "https://registry.yarnpkg.com/micri/-/micri-4.5.1.tgz#be286b99b73d59d38bab190988f98d74aef621e8"
+  integrity sha512-AtvnSBGFglNr+iqs5gufpHT9xRXUabgu9vYEnQYPXSBs+nLSBvmUS5Mzg+3LJ9eQBrNA1o5M49WeqiX1f+d2sg==
   dependencies:
     handler-agent "0.2.0"
 
