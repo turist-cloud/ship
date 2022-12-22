@@ -19,7 +19,7 @@
     "content-type": "1.0.4",
     "cookies": "0.8.0",
     "debug": "4.3.1",
-    "jsonwebtoken": "8.5.1",
+    "jsonwebtoken": "9.0.0",
     "lru-cache": "5.1.1",
     "micri": "4.5.1",
     "ms": "2.1.3",
